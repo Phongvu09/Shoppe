@@ -1,7 +1,7 @@
 import { createResponse } from "../../common/configs/respone.config.js"
 import { handleAsync } from "../../common/utils/handle-asynce.config.js"
-import * as ShopInformationService from "./product.service.js"
-import MESSAGES from "./product.message.js"
+import * as ShopInformationService from "./shop.service.js"
+import MESSAGES from "./shop.message.js"
 
 export const getAllShopInformation = handleAsync(async (req, res) => {
     const shops = await ShopInformationService.getAllShopInformation()

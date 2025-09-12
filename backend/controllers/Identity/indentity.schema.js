@@ -1,18 +1,22 @@
 import { z } from "zod";
-// Schema tạo thông tin cửa hàng mới
-export const createIdentitySchema = z.object({
+export const createIdentityInformationSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),
     dateOfBirth: z.string().min(1, "Date of birth is required"),
-    gender: z.string().min(1, "Gender is required"),
-    email: z.string().email("Invalid email address"),
-    phoneNumber: z.string().min(1, "Phone number is required"),
-}).strict();
+    idNumber: z.string().min(1, "ID number is required"),
+    idIssueDate: z.string().min(1, "ID issue date is required"),
+    idIssuePlace: z.string().min(1, "ID issue place is required"),
+    frontIdImage: z.string().min(1, "Front ID image is required"),
+    backIdImage: z.string().min(1, "Back ID image is required"),
+    selfieWithIdImage: z.string().min(1, "Selfie with ID image is required"),
+}).strict()
 
-// Schema cập nhật thông tin cửa hàng
-export const updateIdentitySchema = z.object({
+export const updateIdentityInformationSchema = z.object({
     fullName: z.string().min(1, "Full name is required").optional(),
     dateOfBirth: z.string().min(1, "Date of birth is required").optional(),
-    gender: z.string().min(1, "Gender is required").optional(),
-    email: z.string().email("Invalid email address").optional(),
-    phoneNumber: z.string().min(1, "Phone number is required").optional(),
-}).strict();
+    idNumber: z.string().min(1, "ID number is required").optional(),
+    idIssueDate: z.string().min(1, "ID issue date is required").optional(),
+    idIssuePlace: z.string().min(1, "ID issue place is required").optional(),
+    frontIdImage: z.string().min(1, "Front ID image is required").optional(),
+    backIdImage: z.string().min(1, "Back ID image is required").optional(),
+    selfieWithIdImage: z.string().min(1, "Selfie with ID image is required").optional(),
+}).strict()

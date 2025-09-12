@@ -1,57 +1,106 @@
-.identity-form {
-    max-width: 650px;
+.identity-form-container {
+    max-width: 700px;
     margin: 20px auto;
-    padding: 20px;
+    padding: 24px;
     border: 1px solid #ddd;
     border-radius: 12px;
     background: #fff;
     font-family: Arial, sans-serif;
 }
 
-.identity-form h2 {
+.identity-form-container h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #333;
 }
 
+.identity-form .form-group {
+    margin-bottom: 16px;
+}
+
 .identity-form label {
     display: block;
-    margin-bottom: 12px;
     font-size: 14px;
     color: #444;
+    margin-bottom: 6px;
 }
 
 .identity-form input,
 .identity-form select {
-    display: block;
     width: 100%;
     padding: 8px;
-    margin-top: 4px;
     border: 1px solid #ccc;
     border-radius: 6px;
+    font-size: 14px;
 }
 
-.section {
-    margin: 16px 0;
-    padding: 12px;
+.identity-form input.error,
+.identity-form select.error {
+    border-color: red;
+    background: #fff5f5;
+}
+
+.identity-form input.error::placeholder {
+    color: #d9534f;
+}
+
+.error-message {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: #d9534f;
+}
+
+.required {
+    color: red;
+}
+
+.upload-section,
+.address-section {
     border: 1px solid #eee;
     border-radius: 8px;
+    padding: 12px;
+    margin: 16px 0;
     background: #fafafa;
 }
 
-.btn-save {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background: #ee4d2d;
-    color: #fff;
+.upload-section legend,
+.address-section legend {
     font-weight: bold;
+    color: #333;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 10px 18px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: 0.2s;
+    font-weight: bold;
+    font-size: 14px;
 }
 
-.btn-save:hover {
+.btn-primary {
+    background: #ee4d2d;
+    color: #fff;
+}
+
+.btn-primary:hover {
     background: #d63d1e;
+}
+
+.btn-secondary {
+    background: #f0f0f0;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #ddd;
 }

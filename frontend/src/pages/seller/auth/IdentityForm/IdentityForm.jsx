@@ -1,214 +1,326 @@
 import { useState } from "react";
 import "./IdentityForm.css";
+import { useNavigate } from "react-router-dom";
 
 export default function IdentityForm({ onSubmit }) {
+    const navigate = useNavigate();
+
     const [form, setForm] = useState({
-        ownerType: "individual",
-        personalInfo: {
-            fullName: "",
-            idType: "CCCD",
-            idNumber: "",
-            issuedDate: "",
-            issuedPlace: "",
-            frontImage: "",
-            backImage: ""
+        fullName: "",
+        dateOfBirth: "",
+        idType: "CCCD",
+        idNumber: "",
+        issuedDate: "",
+        issuedPlace: "",
+        frontImage: null,
+        backImage: null,
+        selfieImage: null,
+        email: "",
+        phoneNumber: "",
+        address: {
+            country: "Việt Nam",
+            province: "",
+            district: "",
+            ward: "",
+            street: "",
         },
-        businessInfo: {
-            companyName: "",
-            businessLicenseNumber: "",
-            issuedDate: "",
-            issuedPlace: "",
-            licenseImage: ""
-        }
     });
 
-    const handleChange = (section, field, value) => {
+    const [errors, setErrors] = useState({});
+
+    const handleChange = (field, value) => {
+        setForm({ ...form, [field]: value });
+        setErrors({ ...errors, [field]: "" });
+    };
+
+    const handleAddressChange = (field, value) => {
         setForm({
             ...form,
-            [section]: {
-                ...form[section],
-                [field]: value
-            }
+            address: { ...form.address, [field]: value },
+        });
+        setErrors({
+            ...errors,
+            address: { ...errors.address, [field]: "" },
         });
     };
 
-    const handleOwnerTypeChange = (value) => {
-        setForm({ ...form, ownerType: value });
+    const handleFileChange = (field, file) => {
+        setForm({ ...form, [field]: file });
+        setErrors({ ...errors, [field]: "" });
     };
 
-    const handleSubmit = (e) => {
+    const validateForm = () => {
+        const newErrors = {};
+        if (!form.fullName) newErrors.fullName = "Vui lòng nhập họ và tên";
+        if (!form.dateOfBirth) newErrors.dateOfBirth = "Vui lòng chọn ngày sinh";
+        if (!form.idNumber) newErrors.idNumber = "Vui lòng nhập số giấy tờ";
+        if (!form.issuedDate) newErrors.issuedDate = "Vui lòng chọn ngày cấp";
+        if (!form.issuedPlace) newErrors.issuedPlace = "Vui lòng nhập nơi cấp";
+        if (!form.frontImage) newErrors.frontImage = "Vui lòng tải ảnh mặt trước";
+        if (!form.backImage) newErrors.backImage = "Vui lòng tải ảnh mặt sau";
+        if (!form.selfieImage) newErrors.selfieImage = "Vui lòng tải ảnh selfie";
+        if (!form.email) newErrors.email = "Vui lòng nhập email";
+        if (!form.phoneNumber) newErrors.phoneNumber = "Vui lòng nhập số điện thoại";
+        if (!form.address.province) newErrors.province = "Vui lòng nhập tỉnh/thành phố";
+        if (!form.address.district) newErrors.district = "Vui lòng nhập quận/huyện";
+        if (!form.address.ward) newErrors.ward = "Vui lòng nhập phường/xã";
+        if (!form.address.street) newErrors.street = "Vui lòng nhập số nhà, tên đường";
+        return newErrors;
+    };
+
+    const handleSubmit = (e, action = "next") => {
         e.preventDefault();
+
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+
         onSubmit(form);
+
+        if (action === "next") {
+            navigate("/tax-form"); // sang bước tiếp theo
+        } else {
+            console.log("Thông tin định danh đã được lưu tạm thời.");
+        }
     };
 
     return (
-        <form className="identity-form" onSubmit={handleSubmit}>
+        <div className="identity-form-container">
             <h2>Thông tin Định danh</h2>
-
-            <label>
-                Loại chủ sở hữu:
-                <select
-                    value={form.ownerType}
-                    onChange={(e) => handleOwnerTypeChange(e.target.value)}
-                >
-                    <option value="individual">Cá nhân</option>
-                    <option value="business">Doanh nghiệp</option>
-                </select>
-            </label>
-
-            {form.ownerType === "individual" && (
-                <div className="section">
+            <form className="identity-form">
+                {/* Họ tên */}
+                <div className="form-group">
                     <label>
-                        Họ và tên:
-                        <input
-                            type="text"
-                            value={form.personalInfo.fullName}
-                            onChange={(e) =>
-                                handleChange("personalInfo", "fullName", e.target.value)
-                            }
-                            required
-                        />
+                        Họ và tên <span className="required">*</span>
                     </label>
+                    <input
+                        type="text"
+                        value={form.fullName}
+                        onChange={(e) => handleChange("fullName", e.target.value)}
+                        placeholder="Nguyễn Văn A"
+                        className={errors.fullName ? "error" : ""}
+                    />
+                    {errors.fullName && <span className="error-message">{errors.fullName}</span>}
+                </div>
 
+                {/* Ngày sinh */}
+                <div className="form-group">
                     <label>
-                        Loại giấy tờ:
-                        <select
-                            value={form.personalInfo.idType}
-                            onChange={(e) =>
-                                handleChange("personalInfo", "idType", e.target.value)
-                            }
-                        >
-                            <option value="CCCD">CCCD</option>
-                            <option value="CMND">CMND</option>
-                            <option value="Passport">Passport</option>
-                        </select>
+                        Ngày sinh <span className="required">*</span>
                     </label>
+                    <input
+                        type="date"
+                        value={form.dateOfBirth}
+                        onChange={(e) => handleChange("dateOfBirth", e.target.value)}
+                        className={errors.dateOfBirth ? "error" : ""}
+                    />
+                    {errors.dateOfBirth && <span className="error-message">{errors.dateOfBirth}</span>}
+                </div>
 
-                    <label>
-                        Số giấy tờ:
-                        <input
-                            type="text"
-                            value={form.personalInfo.idNumber}
-                            onChange={(e) =>
-                                handleChange("personalInfo", "idNumber", e.target.value)
-                            }
-                            required
-                        />
-                    </label>
+                {/* Loại giấy tờ */}
+                <div className="form-group">
+                    <label>Loại giấy tờ</label>
+                    <select
+                        value={form.idType}
+                        onChange={(e) => handleChange("idType", e.target.value)}
+                    >
+                        <option value="CCCD">CCCD</option>
+                        <option value="CMND">CMND</option>
+                        <option value="Passport">Passport</option>
+                    </select>
+                </div>
 
+                {/* Số giấy tờ */}
+                <div className="form-group">
                     <label>
-                        Ngày cấp:
-                        <input
-                            type="date"
-                            value={form.personalInfo.issuedDate}
-                            onChange={(e) =>
-                                handleChange("personalInfo", "issuedDate", e.target.value)
-                            }
-                        />
+                        Số giấy tờ <span className="required">*</span>
                     </label>
+                    <input
+                        type="text"
+                        value={form.idNumber}
+                        onChange={(e) => handleChange("idNumber", e.target.value)}
+                        placeholder="0123456789"
+                        className={errors.idNumber ? "error" : ""}
+                    />
+                    {errors.idNumber && <span className="error-message">{errors.idNumber}</span>}
+                </div>
 
+                {/* Ngày cấp */}
+                <div className="form-group">
                     <label>
-                        Nơi cấp:
-                        <input
-                            type="text"
-                            value={form.personalInfo.issuedPlace}
-                            onChange={(e) =>
-                                handleChange("personalInfo", "issuedPlace", e.target.value)
-                            }
-                        />
+                        Ngày cấp <span className="required">*</span>
                     </label>
+                    <input
+                        type="date"
+                        value={form.issuedDate}
+                        onChange={(e) => handleChange("issuedDate", e.target.value)}
+                        className={errors.issuedDate ? "error" : ""}
+                    />
+                    {errors.issuedDate && <span className="error-message">{errors.issuedDate}</span>}
+                </div>
+
+                {/* Nơi cấp */}
+                <div className="form-group">
+                    <label>
+                        Nơi cấp <span className="required">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        value={form.issuedPlace}
+                        onChange={(e) => handleChange("issuedPlace", e.target.value)}
+                        placeholder="Cục Cảnh sát QLHC"
+                        className={errors.issuedPlace ? "error" : ""}
+                    />
+                    {errors.issuedPlace && <span className="error-message">{errors.issuedPlace}</span>}
+                </div>
+
+                {/* Upload ảnh */}
+                <fieldset className="upload-section">
+                    <legend>Ảnh giấy tờ <span className="required">*</span></legend>
 
                     <label>
                         Ảnh mặt trước:
                         <input
-                            type="text"
-                            placeholder="URL ảnh (Cloudinary)"
-                            value={form.personalInfo.frontImage}
-                            onChange={(e) =>
-                                handleChange("personalInfo", "frontImage", e.target.value)
-                            }
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange("frontImage", e.target.files[0])}
+                            className={errors.frontImage ? "error" : ""}
                         />
+                        {errors.frontImage && <span className="error-message">{errors.frontImage}</span>}
                     </label>
 
                     <label>
                         Ảnh mặt sau:
                         <input
-                            type="text"
-                            placeholder="URL ảnh (Cloudinary)"
-                            value={form.personalInfo.backImage}
-                            onChange={(e) =>
-                                handleChange("personalInfo", "backImage", e.target.value)
-                            }
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange("backImage", e.target.files[0])}
+                            className={errors.backImage ? "error" : ""}
                         />
+                        {errors.backImage && <span className="error-message">{errors.backImage}</span>}
                     </label>
+
+                    <label>
+                        Ảnh selfie:
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileChange("selfieImage", e.target.files[0])}
+                            className={errors.selfieImage ? "error" : ""}
+                        />
+                        {errors.selfieImage && <span className="error-message">{errors.selfieImage}</span>}
+                    </label>
+                </fieldset>
+
+                {/* Email */}
+                <div className="form-group">
+                    <label>
+                        Email <span className="required">*</span>
+                    </label>
+                    <input
+                        type="email"
+                        value={form.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        placeholder="example@email.com"
+                        className={errors.email ? "error" : ""}
+                    />
+                    {errors.email && <span className="error-message">{errors.email}</span>}
                 </div>
-            )}
 
-            {form.ownerType === "business" && (
-                <div className="section">
+                {/* Phone */}
+                <div className="form-group">
                     <label>
-                        Tên công ty:
-                        <input
-                            type="text"
-                            value={form.businessInfo.companyName}
-                            onChange={(e) =>
-                                handleChange("businessInfo", "companyName", e.target.value)
-                            }
-                            required
-                        />
+                        Số điện thoại <span className="required">*</span>
                     </label>
-
-                    <label>
-                        Số GPKD:
-                        <input
-                            type="text"
-                            value={form.businessInfo.businessLicenseNumber}
-                            onChange={(e) =>
-                                handleChange("businessInfo", "businessLicenseNumber", e.target.value)
-                            }
-                            required
-                        />
-                    </label>
-
-                    <label>
-                        Ngày cấp:
-                        <input
-                            type="date"
-                            value={form.businessInfo.issuedDate}
-                            onChange={(e) =>
-                                handleChange("businessInfo", "issuedDate", e.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Nơi cấp:
-                        <input
-                            type="text"
-                            value={form.businessInfo.issuedPlace}
-                            onChange={(e) =>
-                                handleChange("businessInfo", "issuedPlace", e.target.value)
-                            }
-                        />
-                    </label>
-
-                    <label>
-                        Ảnh giấy phép kinh doanh:
-                        <input
-                            type="text"
-                            placeholder="URL ảnh (Cloudinary)"
-                            value={form.businessInfo.licenseImage}
-                            onChange={(e) =>
-                                handleChange("businessInfo", "licenseImage", e.target.value)
-                            }
-                        />
-                    </label>
+                    <input
+                        type="tel"
+                        value={form.phoneNumber}
+                        onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                        placeholder="0987654321"
+                        className={errors.phoneNumber ? "error" : ""}
+                    />
+                    {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
                 </div>
-            )}
 
-            <button type="submit" className="btn-save">
-                Lưu thông tin
-            </button>
-        </form>
+                {/* Địa chỉ */}
+                <fieldset className="address-section">
+                    <legend>Địa chỉ thường trú</legend>
+
+                    <label>
+                        Tỉnh/Thành phố <span className="required">*</span>
+                        <input
+                            type="text"
+                            value={form.address.province}
+                            onChange={(e) => handleAddressChange("province", e.target.value)}
+                            className={errors.province ? "error" : ""}
+                        />
+                        {errors.province && <span className="error-message">{errors.province}</span>}
+                    </label>
+
+                    <label>
+                        Quận/Huyện <span className="required">*</span>
+                        <input
+                            type="text"
+                            value={form.address.district}
+                            onChange={(e) => handleAddressChange("district", e.target.value)}
+                            className={errors.district ? "error" : ""}
+                        />
+                        {errors.district && <span className="error-message">{errors.district}</span>}
+                    </label>
+
+                    <label>
+                        Phường/Xã <span className="required">*</span>
+                        <input
+                            type="text"
+                            value={form.address.ward}
+                            onChange={(e) => handleAddressChange("ward", e.target.value)}
+                            className={errors.ward ? "error" : ""}
+                        />
+                        {errors.ward && <span className="error-message">{errors.ward}</span>}
+                    </label>
+
+                    <label>
+                        Số nhà, tên đường <span className="required">*</span>
+                        <input
+                            type="text"
+                            value={form.address.street}
+                            onChange={(e) => handleAddressChange("street", e.target.value)}
+                            className={errors.street ? "error" : ""}
+                        />
+                        {errors.street && <span className="error-message">{errors.street}</span>}
+                    </label>
+                </fieldset>
+
+                {/* Actions */}
+                <div className="form-actions">
+                    <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => navigate("/tax-form")}
+                    >
+                        Quay lại
+                    </button>
+
+                    <div>
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={(e) => handleSubmit(e, "save")}
+                        >
+                            Lưu
+                        </button>
+                        <button
+                            type="submit"
+                            className="btn-primary"
+                            onClick={(e) => handleSubmit(e, "next")}
+                        >
+                            Tiếp theo
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
     );
 }

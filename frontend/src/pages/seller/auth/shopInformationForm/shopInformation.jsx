@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import "./ShopInformation.css";
 import { createShopInformation } from "../../../../api/shopInformation.js";
+import { useNavigate } from "react-router-dom";
 
 const ShopInformation = () => {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         shopName: "",
         receiverName: "",
@@ -11,6 +14,7 @@ const ShopInformation = () => {
         ward: "",
         district: "",
         city: "",
+        commune: "",
         email: ""
     });
 
@@ -18,6 +22,7 @@ const ShopInformation = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+        setErrors({ ...errors, [e.target.name]: "" });
     };
 
     const validateForm = () => {
@@ -25,25 +30,20 @@ const ShopInformation = () => {
         if (!formData.shopName) newErrors.shopName = "Vui lòng nhập tên shop";
         if (!formData.receiverName) newErrors.receiverName = "Vui lòng nhập tên người nhận";
         if (!formData.phone) newErrors.phone = "Vui lòng nhập số điện thoại";
-        if (formData.phone && !/^0[0-9]{9}$/.test(formData.phone))
-            newErrors.phone = "Số điện thoại không hợp lệ";
         if (!formData.street) newErrors.street = "Vui lòng nhập số nhà, tên đường";
         if (!formData.ward) newErrors.ward = "Vui lòng nhập phường/xã";
         if (!formData.district) newErrors.district = "Vui lòng nhập quận/huyện";
         if (!formData.city) newErrors.city = "Vui lòng nhập tỉnh/thành phố";
         if (!formData.email) newErrors.email = "Vui lòng nhập email";
-        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email))
-            newErrors.email = "Email không hợp lệ";
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+        return newErrors;
     };
 
     const handleSubmit = (e, action = "next") => {
         e.preventDefault();
 
-        if (!validateForm()) {
-            console.log("Form chưa hợp lệ");
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
             return;
         }
 
@@ -58,7 +58,7 @@ const ShopInformation = () => {
                     "Province(City)": formData.city,
                     District: formData.district,
                     Ward: formData.ward,
-                    Commune: ""
+                    Commune: formData.commune || ""
                 },
                 addressDetail: formData.street
             }
@@ -68,144 +68,165 @@ const ShopInformation = () => {
             .then((response) => {
                 console.log("Shop information saved:", response.data);
                 if (action === "next") {
-                    console.log("👉 Chuyển sang bước tiếp theo...");
+                    navigate("/shipping-form");
+                } else if (action === "save") {
+                    console.log("Thông tin đã được lưu tạm thời.");
                 } else {
-                    console.log("👉 Thông tin đã được lưu.");
+                    console.log("Unknown action:", action);
                 }
             })
             .catch((error) => {
-                console.error("❌ Error saving shop information:", error);
+                console.error("Error saving shop information:", error);
             });
     };
 
     return (
         <div className="shop-info-container">
             <h2>Thông tin Shop</h2>
-            <form onSubmit={(e) => handleSubmit(e, "next")} className="shop-info-form">
+            <form onSubmit={handleSubmit} className="shop-info-form">
                 {/* Tên Shop */}
-                <div className="form-group">
-                    <label htmlFor="shopName">Tên Shop</label>
+                <label>
+                    Tên Shop
                     <input
                         type="text"
-                        id="shopName"
                         name="shopName"
                         value={formData.shopName}
                         onChange={handleChange}
-                        required
+                        placeholder="Nhập tên shop"
+                        className={errors.shopName ? "error" : ""}
                     />
-                    {errors.shopName && <span className="error">{errors.shopName}</span>}
-                </div>
+                    {errors.shopName && <span className="error-text">{errors.shopName}</span>}
+                </label>
 
                 <h3>Địa chỉ lấy hàng</h3>
 
-                {/* Người nhận */}
-                <div className="form-group">
-                    <label htmlFor="receiverName">Tên người nhận</label>
+                <label>
+                    Người nhận
                     <input
                         type="text"
-                        id="receiverName"
                         name="receiverName"
                         value={formData.receiverName}
                         onChange={handleChange}
-                        required
+                        placeholder="Nguyễn Văn A"
+                        className={errors.receiverName ? "error" : ""}
                     />
-                    {errors.receiverName && (
-                        <span className="error">{errors.receiverName}</span>
-                    )}
-                </div>
+                    {errors.receiverName && <span className="error-text">{errors.receiverName}</span>}
+                </label>
 
-                {/* Điện thoại */}
-                <div className="form-group">
-                    <label htmlFor="phone">Số điện thoại</label>
+                <label>
+                    Số điện thoại
                     <input
                         type="tel"
-                        id="phone"
                         name="phone"
                         value={formData.phone}
                         onChange={handleChange}
-                        required
+                        placeholder="0987654321"
+                        className={errors.phone ? "error" : ""}
                     />
-                    {errors.phone && <span className="error">{errors.phone}</span>}
-                </div>
+                    {errors.phone && <span className="error-text">{errors.phone}</span>}
+                </label>
 
-                {/* Địa chỉ chi tiết */}
-                <div className="form-group">
-                    <label htmlFor="street">Số nhà, tên đường</label>
+                <label>
+                    Số nhà, tên đường
                     <input
                         type="text"
-                        id="street"
                         name="street"
                         value={formData.street}
                         onChange={handleChange}
-                        required
+                        placeholder="123 Lý Thường Kiệt"
+                        className={errors.street ? "error" : ""}
                     />
-                    {errors.street && <span className="error">{errors.street}</span>}
+                    {errors.street && <span className="error-text">{errors.street}</span>}
+                </label>
+
+                <div className="form-inline">
+                    <label>
+                        Phường / Xã
+                        <input
+                            type="text"
+                            name="ward"
+                            value={formData.ward}
+                            onChange={handleChange}
+                            placeholder="Phường 5"
+                            className={errors.ward ? "error" : ""}
+                        />
+                        {errors.ward && <span className="error-text">{errors.ward}</span>}
+                    </label>
+
+                    <label>
+                        Thôn / Ấp
+                        <input
+                            type="text"
+                            name="commune"
+                            value={formData.commune}
+                            onChange={handleChange}
+                            placeholder="Ấp 1 (không bắt buộc)"
+                        />
+                    </label>
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="ward">Phường / Xã</label>
-                    <input
-                        type="text"
-                        id="ward"
-                        name="ward"
-                        value={formData.ward}
-                        onChange={handleChange}
-                        required
-                    />
-                    {errors.ward && <span className="error">{errors.ward}</span>}
+                <div className="form-inline">
+                    <label>
+                        Quận / Huyện
+                        <input
+                            type="text"
+                            name="district"
+                            value={formData.district}
+                            onChange={handleChange}
+                            placeholder="Quận Tân Bình"
+                            className={errors.district ? "error" : ""}
+                        />
+                        {errors.district && <span className="error-text">{errors.district}</span>}
+                    </label>
+
+                    <label>
+                        Tỉnh / Thành phố
+                        <input
+                            type="text"
+                            name="city"
+                            value={formData.city}
+                            onChange={handleChange}
+                            placeholder="TP. Hồ Chí Minh"
+                            className={errors.city ? "error" : ""}
+                        />
+                        {errors.city && <span className="error-text">{errors.city}</span>}
+                    </label>
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="district">Quận / Huyện</label>
-                    <input
-                        type="text"
-                        id="district"
-                        name="district"
-                        value={formData.district}
-                        onChange={handleChange}
-                        required
-                    />
-                    {errors.district && <span className="error">{errors.district}</span>}
-                </div>
-
-                <div className="form-group">
-                    <label htmlFor="city">Tỉnh / Thành phố</label>
-                    <input
-                        type="text"
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleChange}
-                        required
-                    />
-                    {errors.city && <span className="error">{errors.city}</span>}
-                </div>
-
-                {/* Email */}
-                <div className="form-group">
-                    <label htmlFor="email">Email</label>
+                <label>
+                    Email
                     <input
                         type="email"
-                        id="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        required
+                        placeholder="example@email.com"
+                        className={errors.email ? "error" : ""}
                     />
-                    {errors.email && <span className="error">{errors.email}</span>}
-                </div>
+                    {errors.email && <span className="error-text">{errors.email}</span>}
+                </label>
 
+                {/* Actions giống Identity/Tax */}
                 <div className="form-actions">
                     <button
                         type="button"
                         className="btn-secondary"
-                        onClick={(e) => handleSubmit(e, "save")}
+                        onClick={() => navigate(-1)}
                     >
-                        Lưu
+                        Quay lại
                     </button>
-                    <button type="submit" className="btn-primary">
-                        Tiếp theo
-                    </button>
+                    <div className="right-buttons">
+                        <button
+                            type="button"
+                            className="btn-secondary"
+                            onClick={(e) => handleSubmit(e, "save")}
+                        >
+                            Lưu
+                        </button>
+                        <button type="submit" className="btn-primary" onClick={(e) => handleSubmit(e, "next")}>
+                            Tiếp theo
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

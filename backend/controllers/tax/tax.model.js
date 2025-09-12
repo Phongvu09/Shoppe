@@ -1,29 +1,44 @@
-import mongoose from "mongoose";
+const taxSchema = new mongoose.Schema({
+    shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Shop", required: true },
+    businessType: { type: String, enum: ["Individual", "HouseholdBusiness", "Company"], required: true },
 
-const tax = new mongoose.Schema({
-    shopId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Shop",
-        required: true
-    },
-    businessType: {
+    // Cá nhân
+    fullName: {
         type: String,
-        enum: ["Individual", "Housldhold Bussiness", "Company"],
-        required: true
+        required: function () { return this.businessType === "Individual"; }
     },
-    CompanyName: { type: String },
-    BusinessRegistrationAddress: {
+    personalAddress: {
+        type: String,
+        required: function () { return this.businessType === "Individual"; }
+    },
+
+    // Hộ kinh doanh / Công ty
+    companyName: {
+        type: String,
+        required: function () { return this.businessType !== "Individual"; }
+    },
+    businessRegistrationAddress: {
         country: { type: String, default: "Việt Nam" },
-        "Province(City)": { type: String, required: true },
-        District: { type: String, required: true },
-        Ward: { type: String, required: true },
-        Commune: { type: String }
+        province: {
+            type: String,
+            required: function () { return this.businessType !== "Individual"; }
+        },
+        district: {
+            type: String,
+            required: function () { return this.businessType !== "Individual"; }
+        },
+        ward: {
+            type: String,
+            required: function () { return this.businessType !== "Individual"; }
+        },
+        commune: { type: String }
     },
+    businessLicense: {
+        type: String,
+        required: function () { return this.businessType !== "Individual"; }
+    },
+
+    // Chung
     taxCode: { type: String, required: true },
-    EmailforReceiving_eInvoices: {
-        type: String, required: true
-    }
-
-
-})
-export default mongoose.model("Tax", tax);
+    emailForReceivingEInvoices: { type: String, required: true }
+});

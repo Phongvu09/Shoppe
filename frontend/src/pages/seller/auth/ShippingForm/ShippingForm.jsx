@@ -1,117 +1,161 @@
 import { useState } from "react";
 import "./ShippingForm.css";
 import { createShippingInformation } from "../../../../api/shipping.js";
+import { useNavigate } from "react-router-dom";
 
-const SHIPPING_METHODS = [
-    { value: "express", label: "Giao hàng nhanh" },
-    { value: "fast", label: "Giao hàng tiết kiệm" },
-    { value: "pickup", label: "Người mua tự đến lấy" },
-    { value: "bulky", label: "Hàng cồng kềnh" }
+const SHIPPING_GROUPS = [
+    { key: "express", title: "Siêu Tốc - Hỏa tốc", methods: ["Hỏa Tốc - Trong Ngày", "Siêu Tốc - 4 Giờ"] },
+    { key: "fast", title: "Nhanh", methods: ["Nhanh"] },
+    { key: "pickup", title: "Tủ Nhận Hàng", methods: ["Tủ Nhận Hàng"] },
+    { key: "bulky", title: "Hàng Cồng Kềnh", methods: ["Hàng Cồng Kềnh"] }
 ];
 
-const ShippingForm = ({ onBack }) => {
-    const [methods, setMethods] = useState(
-        SHIPPING_METHODS.map(m => ({
-            name: m.value,
-            isActive: false,
-            codEnabled: false,
-            weightLimit: ""
+export default function ShippingForm() {
+    const navigate = useNavigate();
+
+    const [groups, setGroups] = useState(
+        SHIPPING_GROUPS.map((g) => ({
+            ...g,
+            isOpen: true,
+            methodsState: g.methods.map((m) => ({
+                name: m,
+                isActive: true,
+                codEnabled: true
+            }))
         }))
     );
-    const [errors, setErrors] = useState("");
 
-    const handleChange = (index, field, value) => {
-        const updated = [...methods];
-        updated[index][field] = value;
-        setMethods(updated);
+    const [errors, setErrors] = useState({});
+
+    const toggleMethod = (groupIdx, methodIdx, field) => {
+        const updated = [...groups];
+        updated[groupIdx].methodsState[methodIdx][field] =
+            !updated[groupIdx].methodsState[methodIdx][field];
+        setGroups(updated);
+    };
+
+    const toggleAccordion = (idx) => {
+        const updated = [...groups];
+        updated[idx].isOpen = !updated[idx].isOpen;
+        setGroups(updated);
     };
 
     const validateForm = () => {
-        const hasActive = methods.some(m => m.isActive);
-        if (!hasActive) {
-            setErrors("Bạn phải bật ít nhất 1 phương thức vận chuyển.");
-            return false;
+        const newErrors = {};
+        let hasActiveMethod = groups.some((g) =>
+            g.methodsState.some((m) => m.isActive)
+        );
+        if (!hasActiveMethod) {
+            newErrors.methods = "Vui lòng bật ít nhất một phương thức vận chuyển";
         }
-        setErrors("");
-        return true;
+        return newErrors;
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e, action = "next") => {
         e.preventDefault();
-        if (!validateForm()) return;
 
-        try {
-            const res = await createShippingInformation({ methods });
-            console.log("Shipping info saved:", res.data);
-            // TODO: chuyển bước tiếp theo
-        } catch (err) {
-            console.error("Error saving shipping info:", err);
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
         }
+
+        const payload = groups.map((group) => ({
+            group: group.key,
+            methods: group.methodsState.map((m) => ({
+                name: m.name,
+                isActive: m.isActive,
+                codEnabled: m.codEnabled
+            }))
+        }));
+
+        createShippingInformation(payload)
+            .then((response) => {
+                console.log("Shipping information saved:", response.data);
+                if (action === "next") {
+                    navigate("/tax-form");
+                } else if (action === "save") {
+                    console.log("Thông tin đã được lưu tạm thời.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error saving shipping information:", error);
+            });
     };
 
     return (
-        <div className="shipping-container">
-            <h2>Cấu hình vận chuyển</h2>
-            <form onSubmit={handleSubmit} className="shipping-form">
-                {methods.map((method, idx) => (
-                    <div key={method.name} className="shipping-method">
-                        <h3>{SHIPPING_METHODS.find(m => m.value === method.name).label}</h3>
+        <form className="shipping-form">
+            <h2>Cấu hình Vận chuyển</h2>
 
-                        <div className="form-group">
-                            <label>Bật phương thức</label>
-                            <input
-                                type="checkbox"
-                                checked={method.isActive}
-                                onChange={e => handleChange(idx, "isActive", e.target.checked)}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Hỗ trợ COD</label>
-                            <input
-                                type="checkbox"
-                                checked={method.codEnabled}
-                                disabled={!method.isActive}
-                                onChange={e => handleChange(idx, "codEnabled", e.target.checked)}
-                            />
-                        </div>
-
-                        {method.name === "pickup" && method.isActive && (
-                            <div className="form-group">
-                                <label>Giới hạn khối lượng (kg)</label>
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={method.weightLimit}
-                                    onChange={e => handleChange(idx, "weightLimit", e.target.value)}
-                                />
-                            </div>
-                        )}
+            {groups.map((group, gIdx) => (
+                <div className="accordion" key={group.key}>
+                    <div
+                        className="accordion-header"
+                        onClick={() => toggleAccordion(gIdx)}
+                    >
+                        {group.title}
+                        <span>{group.isOpen ? "▾" : "▸"}</span>
                     </div>
-                ))}
+                    {group.isOpen && (
+                        <div className="accordion-body">
+                            {group.methodsState.map((method, mIdx) => (
+                                <label className="method-row" key={method.name}>
+                                    <span className="method-label">{method.name}</span>
+                                    <label className="switch-label switch">
+                                        <input
+                                            type="checkbox"
+                                            checked={method.isActive}
+                                            onChange={() =>
+                                                toggleMethod(gIdx, mIdx, "isActive")
+                                            }
+                                        />
+                                        <span className="slider"></span>
+                                    </label>
+                                    {method.isActive && (
+                                        <span className="cod-label">
+                                            [COD đã được kích hoạt]
+                                        </span>
+                                    )}
+                                </label>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            ))}
 
-                {errors && <p className="error-text">{errors}</p>}
+            {errors.methods && (
+                <p className="error-text">{errors.methods}</p>
+            )}
 
-                <div className="form-actions">
+            {/* Buttons */}
+            <div className="form-actions">
+                {/* Quay lại */}
+                <button
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => navigate("/shop-info")}
+                >
+                    Quay lại
+                </button>
+
+                {/* Lưu + Tiếp theo */}
+                <div className="right-buttons">
                     <button
                         type="button"
-                        className="btn-back"
-                        onClick={onBack}
+                        className="btn-save"
+                        onClick={(e) => handleSubmit(e, "save")}
                     >
-                        Quay lại
+                        Lưu
                     </button>
-                    <div className="right-buttons">
-                        <button type="button" className="btn-secondary">
-                            Lưu
-                        </button>
-                        <button type="submit" className="btn-primary">
-                            Tiếp theo
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        className="btn-next"
+                        onClick={(e) => handleSubmit(e, "next")}
+                    >
+                        Tiếp theo
+                    </button>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
     );
-};
-
-export default ShippingForm;
+}
