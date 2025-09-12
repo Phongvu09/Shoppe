@@ -1,41 +1,42 @@
-import api from "./api.js"; // Đảm bảo bạn có file api.js cấu hình axios
+import api from "./api";
 
-export async function getAllProducts() {
+export async function getAllShopInformation() {
     try {
-        const response = await api.get("/product/");
+        const response = await api.get("/shop/");
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
     }
 }
-export async function getProductById(id) {
-    try {
-        const response = await api.get(`/product/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || error.message;
-    }
 
-}
-export async function createProduct(data) {
+export async function getShopInformationById(id) {
     try {
-        const response = await api.post("/product/createProduct", data);
+        const response = await api.get(`/shop/${id}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
     }
 }
-export async function updateProduct(id, data) {
+export async function createShopInformation(data) {
     try {
-        const response = await api.patch(`/product/${id}`, data);
+        const response = await api.post("/shop/createShopInformation", data);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
     }
 }
-export async function deleteProduct(id) {
+
+export async function updateShopInformation(id, data) {
     try {
-        const response = await api.delete(`/product/${id}`);
+        const response = await api.patch(`/shop/${id}`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+}
+export async function deleteShopInformation(id) {
+    try {
+        const response = await api.delete(`/identity/${id}`);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;

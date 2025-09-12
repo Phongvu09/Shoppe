@@ -1,0 +1,110 @@
+/* Container chính */
+.shipping-form {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Tiêu đề lớn */
+.shipping-form h2 {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Box cho từng phương thức */
+.shipping-method {
+    border: 1px solid #e0e0e0;
+    padding: 16px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    background: #fafafa;
+}
+
+.shipping-method h3 {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #444;
+}
+
+/* Mỗi dòng input */
+.form-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.form-group label {
+    width: 220px;
+    font-weight: 500;
+    color: #555;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group input[type="tel"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+.form-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* Nút submit */
+.btn-save {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 18px;
+    background: #ee4d2d;
+    /* màu đỏ cam giống Shopee */
+    color: #fff;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+
+.btn-save:hover {
+    background: #d7391b;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+/* nhóm nút bên phải */
+.right-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-back {
+    background: #9e9e9e;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-back:hover {
+    background: #757575;
+}
