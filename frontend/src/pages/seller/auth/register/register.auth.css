@@ -1,5 +1,5 @@
 /* Container */
-.login-container {
+.register-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,7 +9,7 @@
 }
 
 /* Form box */
-.login-form {
+.register-form {
     background: #fff;
     padding: 24px;
     border-radius: 12px;
@@ -17,7 +17,7 @@
     width: 320px;
 }
 
-.login-form h2 {
+.register-form h2 {
     font-size: 1.5rem;
     font-weight: bold;
     margin-bottom: 16px;
@@ -25,27 +25,26 @@
 }
 
 /* Input */
-.login-form input {
+.register-form input {
     width: 100%;
     padding: 10px;
     margin-bottom: 12px;
     border: 1px solid #d1d5db;
-    /* gray-300 */
     border-radius: 6px;
     outline: none;
 }
 
-.laogin-form input:focus {
-    border-color: #3b82f6;
-    /* blue-500 */
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+.register-form input:focus {
+    border-color: #10b981;
+    /* green-500 */
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
 }
 
 /* Button */
-.login-form button {
+.register-form button {
     width: 100%;
-    background: #3b82f6;
-    /* blue-500 */
+    background: #10b981;
+    /* green-500 */
     color: white;
     padding: 10px;
     border: none;
@@ -54,23 +53,24 @@
     transition: background 0.2s ease-in-out;
 }
 
-.login-form button:hover {
-    background: #2563eb;
-    /* blue-600 */
+.register-form button:hover {
+    background: #059669;
+    /* green-600 */
 }
 
 /* Link */
-.login-form p {
+.register-form p {
     margin-top: 12px;
     font-size: 14px;
     text-align: center;
 }
 
-.login-form a {
+.register-form a {
     color: #3b82f6;
+    /* blue-500 */
     text-decoration: none;
 }
 
-.login-form a:hover {
+.register-form a:hover {
     text-decoration: underline;
 }

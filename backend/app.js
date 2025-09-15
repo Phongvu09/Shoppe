@@ -2,9 +2,9 @@ import express from "express";
 import cors from "cors";
 import userRoutes from "../backend/controllers/users/users.router.js";
 import productRoutes from "../backend/controllers/products/products.router.js";
-import shipRoutes from "../backend/controllers/ship/ship.router.js"
-import salerRoutes from "../backend/controllers/shop/shop.router.js"
+import shipRoutes from "../backend/controllers/ship/shipping.router.js"
 import authRouter from "../backend/controllers/auth/auth.router.js"
+import shopRouters from "../backend/controllers/shopInformation/shop.router.js";
 
 const app = express();
 
@@ -16,8 +16,8 @@ app.use(express.json());
 app.use("/user", userRoutes);
 app.use("/product", productRoutes);
 app.use("/shipping", shipRoutes);
-app.use("/saler", salerRoutes)
-app.use("/auth", authRouter)
+app.use("/auth", authRouter);
+app.use("/shop", shopRouters);
 
 // Error handler
 app.use((err, req, res, next) => {

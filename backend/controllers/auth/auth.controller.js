@@ -20,3 +20,18 @@ export const authLogin = handleAsync(async (req, res) => {
 
     return createResponse(res, 200, MESSAGES.LOGIN_SUCCESS, { user, accessToken });
 });
+
+export const checkHaveSellerRole = handleAsync(async (req, res) => {
+    const { email } = req.body;
+    const isSeller = await checkHaveSellerRoleService(email);
+    return createResponse(res, 200, MESSAGES.CHECK_ROLE_SUCCESS, { isSeller });
+});
+
+export const loginSeller = handleAsync(async (req, res) => {
+    const { user, accessToken } = await loginSellerService(req.body);
+    if (!user || !accessToken) {
+        return createResponse(res, 400, MESSAGES.LOGIN_FAILURE);
+    }
+    return createResponse(res, 200, MESSAGES.LOGIN_SUCCESS, { user, accessToken });
+});
+

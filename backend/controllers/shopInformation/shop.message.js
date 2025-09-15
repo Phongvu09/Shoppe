@@ -10,3 +10,4 @@ const message = {
     DELETE_FAILURE: "Xoá thông tin cửa hàng thất bại",
     NOT_FOUND: "Không tìm thấy thông tin cửa hàng"
 };
+export default message;

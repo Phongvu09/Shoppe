@@ -9,3 +9,4 @@ const MESSAGES = {
     DELETE_FAILURE: "Delete shipping information failed",
     NOT_FOUND: "Shipping information not found",
 };
+export default MESSAGES;
