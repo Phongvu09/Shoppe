@@ -67,6 +67,13 @@ const ShopInformation = () => {
         createShopInformation(payload)
             .then((response) => {
                 console.log("Shop information saved:", response.data);
+
+                // Giả sử backend trả về { shopId: "SH001", shop: { ... } }
+                const shopId = response.data.shopId;
+
+                // Lưu vào localStorage để các form sau dùng lại
+                localStorage.setItem("shopId", shopId);
+
                 if (action === "next") {
                     navigate("/shipping-form");
                 } else if (action === "save") {
@@ -78,6 +85,11 @@ const ShopInformation = () => {
             .catch((error) => {
                 console.error("Error saving shop information:", error);
             });
+
+
+        console.log("Form submitted:", formData);
+
+        localStorage.setItem("shopId", shopId);
     };
 
     return (

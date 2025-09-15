@@ -2,9 +2,8 @@ import mongoose from "mongoose";
 
 const shopSchema = new mongoose.Schema(
     {
-        ownerId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+        shopId: {
+            type: String,
             required: true,
             unique: true // mỗi user chỉ có 1 shop
         },
@@ -26,5 +25,14 @@ const shopSchema = new mongoose.Schema(
     },
     { versionKey: false }
 );
+
+
+shopSchema.pre("validate", async function (next) {
+    if (!this.shopId) {
+        const count = await this.constructor.countDocuments();
+        this.shopId = "SH" + (count + 1).toString().padStart(3, "0");
+    }
+    next();
+});
 
 export default mongoose.model("Shop", shopSchema);

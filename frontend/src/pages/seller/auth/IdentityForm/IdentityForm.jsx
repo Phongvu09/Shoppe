@@ -1,6 +1,7 @@
 import { useState } from "react";
 import "./IdentityForm.css";
 import { useNavigate } from "react-router-dom";
+import { createIdentity } from "../../../../api/identity.js";
 
 export default function IdentityForm({ onSubmit }) {
     const navigate = useNavigate();
@@ -77,14 +78,47 @@ export default function IdentityForm({ onSubmit }) {
             return;
         }
 
-        onSubmit(form);
+        const shopId = localStorage.getItem("shopId");
 
-        if (action === "next") {
-            navigate("/tax-form"); // sang bước tiếp theo
-        } else {
-            console.log("Thông tin định danh đã được lưu tạm thời.");
-        }
+        const payload = {
+            shopId,
+            fullName: form.fullName,
+            dateOfBirth: form.dateOfBirth,
+            idType: form.idType,
+            idNumber: form.idNumber,
+            issuedDate: form.issuedDate,
+            issuedPlace: form.issuedPlace,
+            email: form.email,
+            phoneNumber: form.phoneNumber,
+            address: {
+                country: form.address.country,
+                province: form.address.province,
+                district: form.address.district,
+                ward: form.address.ward,
+                street: form.address.street,
+            },
+            // ảnh ở đây mình để base64 (nếu backend chỉ nhận JSON)
+            frontImage: form.frontImage,
+            backImage: form.backImage,
+            selfieImage: form.selfieImage,
+        };
+
+        createIdentity(payload)
+            .then((response) => {
+                console.log("Identity saved:", response.data);
+
+                if (action === "next") {
+                    navigate("/");
+                } else if (action === "save") {
+                    console.log("Thông tin định danh đã được lưu tạm thời.");
+                }
+            })
+            .catch((error) => {
+                console.error("Error saving identity:", error);
+            });
+        console.log("Form submitted:", form);
     };
+
 
     return (
         <div className="identity-form-container">

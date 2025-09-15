@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { login } from "../../../../api/auth.js";
+import { loginSeller } from "../../../../api/auth.js";
 import "./login.auth.css"; // file CSS riêng
 
 export default function Login() {
@@ -15,7 +15,7 @@ export default function Login() {
 
         try {
             // gọi API login
-            const res = await login(email, password);
+            const res = await loginSeller(email, password);
             console.log("Login success:", res.data);
 
             // lưu token (nếu backend trả token)

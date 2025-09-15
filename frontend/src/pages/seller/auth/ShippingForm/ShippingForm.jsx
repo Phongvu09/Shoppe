@@ -10,6 +10,7 @@ const SHIPPING_GROUPS = [
     { key: "bulky", title: "Hàng Cồng Kềnh", methods: ["Hàng Cồng Kềnh"] }
 ];
 
+const shopId = localStorage.getItem("shopId");
 export default function ShippingForm() {
     const navigate = useNavigate();
 
@@ -61,6 +62,7 @@ export default function ShippingForm() {
         }
 
         const payload = groups.map((group) => ({
+            shopId: shopId,
             group: group.key,
             methods: group.methodsState.map((m) => ({
                 name: m.name,

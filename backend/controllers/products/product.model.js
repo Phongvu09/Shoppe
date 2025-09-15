@@ -71,6 +71,19 @@ const productSchema = new mongoose.Schema(
             type: [String],
             default: [], // Ví dụ: ["red", "blue", "black"]
         },
+        origin: {
+            type: String,
+            default: ""
+        },
+        material: {
+            type: String,
+            default: ""
+        },
+        weight: {
+            type: Number,
+            required: true
+        }
+        ,
         images: [
             {
                 _id: false,

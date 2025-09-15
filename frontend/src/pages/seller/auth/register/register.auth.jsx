@@ -23,7 +23,7 @@ export default function Register() {
         setLoading(true);
         try {
             // gọi API đăng ký
-            const res = await register(username, email, password, USER_ROLE.USER);
+            const res = await register(username, email, password, USER_ROLE.SELLER);
             console.log("Register success:", res.data);
 
             // có thể redirect sang login page

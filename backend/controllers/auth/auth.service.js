@@ -23,7 +23,7 @@ export const autRegisterService = async (userData) => {
         username,
         email,
         password: passwordHash,
-        role: USER_ROLE, // dùng constant thay vì string tay
+        role: [USER_ROLE.USER], // dùng constant thay vì string tay
     });
 
     // 4. Ẩn password trước khi trả response
@@ -67,32 +67,33 @@ export const checkHaveSellerRoleService = async (email) => {
 export const loginSellerService = async (userData) => {
     const { email, password } = userData;
 
-    // Kiểm tra email
+    // 1. Kiểm tra email
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
         throwError(400, MESSAGES.INVALID_CREDENTIALS);
     }
 
-    // Kiểm tra password
+    // 2. Kiểm tra password
     const isPasswordValid = await comparePassword(password, existingUser.password);
     if (!isPasswordValid) {
         throwError(400, MESSAGES.INVALID_CREDENTIALS);
     }
 
+    // 3. Kiểm tra role SELLER, nếu chưa có thì thêm vào
 
-    // Kiểm tra xem có phải seller không
-    const isSeller = await checkHaveSellerRoleService(email);
-    if (isSeller === false) {
-        await autRegisterService(userData);
+    if (!existingUser.role.includes(USER_ROLE.SELLER)) {
+        existingUser.role = [USER_ROLE.USER, USER_ROLE.SELLER];
+        await existingUser.save();
+
     }
 
-    // Tạo accessToken
+    // 4. Tạo accessToken
     const accessToken = generateToken(
         { id: existingUser._id.toString(), role: existingUser.role },
         process.env.JWT_SECRET,
         "7d"
     );
-    existingUser.password = undefined;
 
+    existingUser.password = undefined;
     return { user: existingUser, accessToken };
-}
+};

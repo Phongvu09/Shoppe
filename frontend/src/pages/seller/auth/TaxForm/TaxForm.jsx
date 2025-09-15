@@ -3,6 +3,7 @@ import "./TaxForm.css";
 import { createTax } from "../../../../api/tax.js";
 import { useNavigate } from "react-router-dom";
 
+const shopId = localStorage.getItem("shopId");
 export default function TaxForm() {
     const navigate = useNavigate();
 
@@ -74,12 +75,18 @@ export default function TaxForm() {
         }
 
         // Tạo payload
-        const payload = new FormData();
+        const payload = {
+            shopId: shopId,
+            businessType: form.businessType,
+            taxCode: form.taxCode,
+            email: form.email
+
+        }
         Object.keys(form).forEach((key) => {
             if (key === "businessRegistrationAddress") {
-                payload.append(key, JSON.stringify(form[key]));
+                payload[key] = JSON.stringify(form[key]);
             } else {
-                payload.append(key, form[key]);
+                payload[key] = form[key];
             }
         });
 

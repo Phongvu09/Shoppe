@@ -14,9 +14,9 @@ const userSchema = new mongoose.Schema({
 
     // thêm role
     role: {
-        type: String,
+        type: [String],
         enum: Object.values(USER_ROLE),
-        default: USER_ROLE.USER,
+        default: [USER_ROLE.USER]   // Mặc định là USER,
     },
 
     createdAt: { type: Date, default: Date.now },
