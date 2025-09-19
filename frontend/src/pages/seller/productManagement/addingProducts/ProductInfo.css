@@ -1,0 +1,53 @@
+.product-info {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 25px 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-info h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+}
+
+.product-info label {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+}
+
+.product-info input,
+.product-info textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.product-info textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.product-info button {
+    margin-top: 20px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    background: #ff6600;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.product-info button:hover {
+    background: #e65500;
+}

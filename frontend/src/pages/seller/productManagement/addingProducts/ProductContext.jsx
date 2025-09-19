@@ -4,16 +4,24 @@ const ProductContext = createContext();
 
 export function ProductProvider({ children }) {
     const [productData, setProductData] = useState({
+        // Thông tin cơ bản
         name: "",
         description: "",
+        images: [],
+
+        // Thông tin chi tiết
+        colors: [],
+        sizes: [],
+        origin: "",
+        weight: 0,
+
+        // Thông tin bán hàng
         category: "",
         price: 0,
-        sizes: [],
-        colors: [],
-        origin: "",
-        images: [], // mảng chứa các URL ảnh
         stock: 0,
-        isFeatured: false
+
+        // Khác
+        isFeatured: false,
     });
 
     return (

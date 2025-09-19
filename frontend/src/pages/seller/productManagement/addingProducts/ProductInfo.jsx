@@ -1,50 +1,73 @@
 import { useNavigate } from "react-router-dom";
 import { useProduct } from "../addingProducts/ProductContext.jsx";
-import { set } from "mongoose";
+import { useState } from "react";
+import "./ProductInfo.css";
 
 export default function ProductInfo() {
     const navigate = useNavigate();
     const { productData, setProductData } = useProduct();
+    const [error, setErrors] = useState({});
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!productData.images || productData.images.length === 0)
+            newErrors.images = "Vui lòng chọn ít nhất 1 ảnh";
+        if (!productData.name || productData.name.length < 5)
+            newErrors.name = "Tên sản phẩm có ít nhất 5 chữ";
+        if (!productData.description || productData.description.length < 20)
+            newErrors.description = "Mô tả sản phẩm ít nhất 20 chữ";
+        return newErrors;
+    };
+
+    const handleNext = () => {
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        navigate("/product/detail");
+    };
 
     const handleChange = (e) => {
         setProductData({ ...productData, [e.target.name]: e.target.value });
     };
 
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        setProductData({ ...productData, images: files });
+    };
+
     return (
-        <div>
+        <div className="product-info">
             <h2>Thông tin cơ bản</h2>
-            <div>
+            <label>
+                Ảnh sản phẩm
+                <input type="file" accept="image/*" multiple onChange={handleFileChange} />
+                {error.images && <p className="error">{error.images}</p>}
+            </label>
 
-                <label >
-                    ảnh gốc
-                    <input
-                        type="file"
-                        accept="image/*"
-                        name="origin"
-                        onChange={handleChange}
-                    />
-                </label>
+            <label>
+                Tên sản phẩm
+                <input
+                    type="text"
+                    name="name"
+                    value={productData.name}
+                    onChange={handleChange}
+                />
+                {error.name && <p className="error">{error.name}</p>}
+            </label>
 
-                <label>
-                    Tên sản phẩm
-                    <input
-                        type="text"
-                        name="name"
-                        value={productData.name}
-                        onChange={handleChange}
-                    />
-                </label>
+            <label>
+                Mô tả sản phẩm
+                <textarea
+                    name="description"
+                    value={productData.description}
+                    onChange={handleChange}
+                />
+                {error.description && <p className="error">{error.description}</p>}
+            </label>
 
-                <label >
-                    Mô tả sản phẩm
-                    <textarea
-                        name="description"
-                        value={productData.description}
-                        onChange={handleChange}
-                    />
-                </label>
-                <button onClick={() => navigate("/")}>Tiếp theo</button>
-            </div>
+            <button onClick={handleNext}>Tiếp theo</button>
         </div>
-    )
+    );
 }

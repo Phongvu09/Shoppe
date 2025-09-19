@@ -1,4 +1,8 @@
-import { z } from "zod";
+// Subschema cho ảnh
+const imageSchema = z.object({
+    url: z.string().url("Invalid image URL"),
+    public_id: z.string().min(1, "public_id is required"),
+});
 
 const CATEGORY_ENUM = [
     "electronics",
@@ -41,44 +45,22 @@ const CATEGORY_ENUM = [
     "gift_cards",
 ];
 
-// Subschema cho ảnh
-const imageSchema = z.object({
-    url: z.string().url("Invalid image URL"),
-    public_id: z.string().min(1, "public_id is required"),
-});
+export const createProductSchema = z.object({
+    ownerId: z.string().min(1, "ownerId is required"),
+    name: z.string().min(5, "Product name is must be at least 5 characters"),
+    description: z.string().min(20, "Description must be at least 20 characters"),
+    price: z.number().min(1, "Product price must be at least 1đ"),
+    category: z.enum(CATEGORY_ENUM, {
+        errorMap: () => ({ message: "Invalid category" }),
+    }),
+    sizes: z.array(z.string()).default([]),
+    colors: z.array(z.string()).default([]),
+    origin: z.string().optional(),
+    material: z.string().optional(),
+    weight: z.number().min(1, "Weight must be positive"),
+    images: z.array(imageSchema).min(1, "At least one image is required"),
+    stock: z.number().min(0).default(0),
+    isFeatured: z.boolean().optional().default(false),
+}).strict();
 
-// Schema tạo sản phẩm mới
-export const createProductSchema = z
-    .object({
-        ownerId: z.string().min(1, "ownerId is required"),
-        name: z.string().min(1, "Product name is required"),
-        description: z
-            .string()
-            .min(20, "Description must be at least 20 characters"),
-        price: z.number().min(1, "Product price must be at least 1đ"),
-        category: z.enum(CATEGORY_ENUM, {
-            errorMap: () => ({ message: "Invalid category" }),
-        }),
-        sizes: z.array(z.string()).default([]),
-        colors: z.array(z.string()).default([]),
-        images: z.array(imageSchema).min(1, "At least one image is required"),
-        stock: z.number().min(0),
-        isFeatured: z.boolean().optional().default(false),
-    })
-    .strict();
-
-// Schema cập nhật sản phẩm
-export const updateProductSchema = z
-    .object({
-        ownerId: z.string().min(1).optional(),
-        name: z.string().min(1).optional(),
-        description: z.string().min(20).optional(),
-        price: z.number().min(1).optional(),
-        category: z.enum(CATEGORY_ENUM).optional(),
-        sizes: z.array(z.string()).optional(),
-        colors: z.array(z.string()).optional(),
-        images: z.array(imageSchema).optional(),
-        stock: z.number().min(0).optional(),
-        isFeatured: z.boolean().optional(),
-    })
-    .strict();
+export const updateProductSchema = createProductSchema.partial();
