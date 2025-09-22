@@ -1,10 +1,46 @@
 import express from "express";
-import { getAllUser, deleteUser, deleteAllUser } from "../users/users.controller.js";
+import {
+  register,
+  login,
+  me,
+  getAllUser,
+  getUserById,
+  updateUser,
+  deleteUser,
+  deleteAllUser,
+  refreshToken,      // <-- dùng đúng tên export từ controller
+  forgotPassword,
+  resetPassword,
+} from "../users/users.controller.js";
 
-const router = express.Router()
+import { authMiddleware as requireAuth, restrictTo as requireRole } from "../../common/middleware/auth.js";
+import { USER_ROLE } from "../../common/constant/enum.js";
 
-router.get("/users", getAllUser)
-router.delete("/:id", deleteUser);  // Xoá user theo id
-router.delete("/", deleteAllUser)
+import { validate } from "../../common/middleware/validate.js";
+import {
+  registerSchema,
+  loginSchema,
+  updateUserSchema,
+  refreshSchema,
+  forgotSchema,
+  resetSchema,
+} from "./users.validation.js";
 
-export default router
+const router = express.Router();
+
+/* ---------- Auth ---------- */
+router.post("/register", validate(registerSchema), register);
+router.post("/login", validate(loginSchema), login);
+router.post("/refresh-token", validate(refreshSchema), refreshToken);  // ✅ 1 dòng duy nhất
+router.get("/me", requireAuth, me);
+router.post("/forgot-password", validate(forgotSchema), forgotPassword);
+router.post("/reset-password", validate(resetSchema), resetPassword);
+
+/* ---------- CRUD ---------- */
+router.get("/", requireAuth, requireRole(USER_ROLE.ADMIN), getAllUser);
+router.get("/:id", requireAuth, getUserById);
+router.patch("/:id", requireAuth, validate(updateUserSchema), updateUser);
+router.delete("/:id", requireAuth, requireRole(USER_ROLE.ADMIN), deleteUser);
+router.delete("/", requireAuth, requireRole(USER_ROLE.ADMIN), deleteAllUser);
+
+export default router;

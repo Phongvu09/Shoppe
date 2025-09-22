@@ -1,28 +1,43 @@
 import express from "express";
 import cors from "cors";
-import userRoutes from "../backend/controllers/users/users.router.js";
-import productRoutes from "../backend/controllers/products/products.router.js";
-import shipRoutes from "../backend/controllers/ship/shipping.router.js"
-import authRouter from "../backend/controllers/auth/auth.router.js"
-import shopRouters from "../backend/controllers/shopInformation/shop.router.js";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+
+// Đường dẫn import sửa lại (không cần ../backend nữa)
+import userRoutes from "./controllers/users/users.router.js";
+import productRoutes from "./controllers/products/products.router.js";
+import shipRoutes from "./controllers/ship/shipping.router.js";
+import authRouter from "./controllers/auth/auth.router.js";
+import shopRouters from "./controllers/shopInformation/shop.router.js";
 
 const app = express();
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// Middlewares cơ bản
+app.use(helmet());
+app.use(cors({ origin: true, credentials: true }));
+app.use(express.json({ limit: "1mb" }));
 
-// Routes
-app.use("/user", userRoutes);
-app.use("/product", productRoutes);
-app.use("/shipping", shipRoutes);
-app.use("/auth", authRouter);
-app.use("/shop", shopRouters);
+// Rate limit cho toàn bộ /api
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
+app.use("/api", limiter);
 
-// Error handler
+// Mount routes dưới tiền tố /api để đồng nhất
+app.use("/api/user", userRoutes);
+app.use("/api/product", productRoutes);
+app.use("/api/shipping", shipRoutes);
+app.use("/api/auth", authRouter);
+app.use("/api/shop", shopRouters);
+
+// 404
+app.use((req, res) => {
+  res.status(404).json({ message: "Not Found" });
+});
+
+// Error handler cuối cùng
 app.use((err, req, res, next) => {
-    console.error(err);
-    res.status(500).json({ message: err.message });
+  console.error(err);
+  const status = err.status || 500;
+  res.status(status).json({ message: err.message || "Internal Server Error" });
 });
 
 export default app;
