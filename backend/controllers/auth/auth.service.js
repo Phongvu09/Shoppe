@@ -3,7 +3,7 @@ import { comparePassword, hashPassword } from "../../common/utils/handler-passwo
 import { throwError } from "../../common/utils/errror.config.js";
 import MESSAGES from "./auth.message.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
-import { generateToken } from "../../common/utils/jwt.js";
+import { signAccessToken } from "../../common/utils/jwt.js";
 import { is } from "zod/locales";
 
 export const autRegisterService = async (userData) => {

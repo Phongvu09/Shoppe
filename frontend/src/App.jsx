@@ -12,7 +12,8 @@ import ProductInfo from "./pages/seller/productManagement/addingProducts/Product
 import ProductSales from "./pages/seller/productManagement/addingProducts/ProductSales.jsx";
 import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
 import { Outlet } from "react-router-dom";
-
+import userRouter from "./controllers/users/users.router.js";
+app.use("/api/user", userRouter);
 // wrapper để bọc context
 function ProductWrapper() {
   return (

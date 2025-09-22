@@ -1,27 +1,48 @@
-import { verifyToken } from "../utils/jwt";
-import { createResponse } from "../configs/respone.config";
+// backend/common/middleware/auth.js
+import { verifyAccessToken } from "../utils/jwt.js";
+import { createResponse } from "../configs/respone.config.js";
 
+/** Lấy token từ header */
+const extractToken = (req) => {
+  const auth = req.headers.authorization || "";
+  if (auth.startsWith("Bearer ")) return auth.slice(7);
+  // fallback: hỗ trợ header khác nếu cần
+  return req.headers["x-access-token"] || null;
+};
+
+/** Yêu cầu có token hợp lệ (Authorization: Bearer <token>) */
 export const authMiddleware = (req, res, next) => {
-    const authHeader = req.headers.authorization
-    if (!authHeader || !authHeader.startWith("Bearer")) {
-        createResponse(res, 401, "Unauthorized: No token provided")
-    }
+  const token = extractToken(req);
+  if (!token) return createResponse(res, 401, "Unauthorized: No token provided");
 
-    const token = authHeader.split(" ")[1]
-    try {
-        const decoded = verifyToken(token, process.env.JWT_SECRET)
-        req.user = decoded;
-        next();
-    } catch (error) {
-        createResponse(res, 401, "Unauthorized: Invalid token")
-    }
-}
+  try {
+    const decoded = verifyAccessToken(token);
+    req.user = decoded; // { id, role, ... }
+    return next();
+  } catch (e) {
+    return createResponse(res, 401, "Unauthorized: Invalid token");
+  }
+};
 
-export const restrictTo = (...role) => {
-    return (req, res, next) => {
-        if (!role.includes(req.user.role)) {
-            createResponse(res, 403, "Forbidden: You do not have permission to perform this action")
-        }
-        next();
+/** Chỉ cho phép các role truyền vào */
+export const restrictTo = (...roles) => {
+  return (req, res, next) => {
+    // roles trong token có thể là string hoặc array
+    const userRoles = Array.isArray(req.user?.role)
+      ? req.user.role
+      : [req.user?.role].filter(Boolean);
+
+    const allowed = roles.some((r) => userRoles.includes(r));
+    if (!allowed) {
+      return createResponse(
+        res,
+        403,
+        "Forbidden: You do not have permission to perform this action"
+      );
     }
-}
+    return next();
+  };
+};
+
+export const requireAuth = authMiddleware;
+export const requireRole = restrictTo;

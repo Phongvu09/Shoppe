@@ -2,7 +2,7 @@ import express from "express";
 import { createTaxInformation, getAllTaxInformation, getTaxInformationById, deleteTaxInformation, updateTaxInformation } from "./tax.controller.js";
 import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js"
 import { createTaxInformationSchema, updateTaxInformationSchema } from "./tax.schema.js";
-import { authMiddleware, restrictTo } from "../../common/middleware/auth.middleware.js"
+import { authMiddleware, restrictTo } from "../../common/middleware/auth.js"
 import { USER_ROLE } from "../../common/constant/enum.js";
 
 const router = express.Router();
