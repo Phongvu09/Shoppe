@@ -12,6 +12,16 @@ import ProductInfo from "./pages/seller/productManagement/addingProducts/Product
 import ProductSales from "./pages/seller/productManagement/addingProducts/ProductSales.jsx";
 import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
 import SellerLayout from "./components/SellerLayout.jsx";
+import { Outlet } from "react-router-dom";
+
+// wrapper để bọc context
+function ProductWrapper() {
+  return (
+    <ProductProvider>
+      <Outlet />
+    </ProductProvider>
+  );
+}
 
 function App() {
   return (

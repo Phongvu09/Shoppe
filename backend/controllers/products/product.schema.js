@@ -1,4 +1,3 @@
-// Subschema cho ảnh
 import z from "zod"
 const imageSchema = z.object({
     url: z.string().url("Invalid image URL"),
