@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useProduct } from "../addingProducts/ProductContext.jsx";
 import { useState } from "react";
+import SellerLayout from "../../../../components/SellerLayout.jsx";
 import "./ProductInfo.css";
 
 export default function ProductInfo() {
@@ -38,36 +39,38 @@ export default function ProductInfo() {
     };
 
     return (
-        <div className="product-info">
-            <h2>Thông tin cơ bản</h2>
-            <label>
-                Ảnh sản phẩm
-                <input type="file" accept="image/*" multiple onChange={handleFileChange} />
-                {error.images && <p className="error">{error.images}</p>}
-            </label>
+        <SellerLayout>
+            <div className="product-info">
+                <h2>Thông tin cơ bản</h2>
+                <label>
+                    Ảnh sản phẩm
+                    <input type="file" accept="image/*" multiple onChange={handleFileChange} />
+                    {error.images && <p className="error">{error.images}</p>}
+                </label>
 
-            <label>
-                Tên sản phẩm
-                <input
-                    type="text"
-                    name="name"
-                    value={productData.name}
-                    onChange={handleChange}
-                />
-                {error.name && <p className="error">{error.name}</p>}
-            </label>
+                <label>
+                    Tên sản phẩm
+                    <input
+                        type="text"
+                        name="name"
+                        value={productData.name}
+                        onChange={handleChange}
+                    />
+                    {error.name && <p className="error">{error.name}</p>}
+                </label>
 
-            <label>
-                Mô tả sản phẩm
-                <textarea
-                    name="description"
-                    value={productData.description}
-                    onChange={handleChange}
-                />
-                {error.description && <p className="error">{error.description}</p>}
-            </label>
+                <label>
+                    Mô tả sản phẩm
+                    <textarea
+                        name="description"
+                        value={productData.description}
+                        onChange={handleChange}
+                    />
+                    {error.description && <p className="error">{error.description}</p>}
+                </label>
 
-            <button onClick={handleNext}>Tiếp theo</button>
-        </div>
+                <button onClick={handleNext}>Tiếp theo</button>
+            </div>
+        </SellerLayout >
     );
 }
