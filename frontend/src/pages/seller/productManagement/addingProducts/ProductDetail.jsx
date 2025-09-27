@@ -27,7 +27,7 @@ export default function ProductDetail() {
             setErrors(validationErrors);
             return;
         }
-        navigate("/product/sales");
+        navigate("/seller/product/sales");
     };
 
     return (
@@ -99,7 +99,7 @@ export default function ProductDetail() {
                 </label>
 
                 <div className="buttons">
-                    <button onClick={() => navigate("/product/info")}>Quay lại</button>
+                    <button onClick={() => navigate("/seller/product/info")}>Quay lại</button>
                     <button onClick={handleNext}>Tiếp theo</button>
                 </div>
             </div>

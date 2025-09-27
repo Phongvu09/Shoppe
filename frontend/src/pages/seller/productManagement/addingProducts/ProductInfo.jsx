@@ -26,7 +26,7 @@ export default function ProductInfo() {
             setErrors(validationErrors);
             return;
         }
-        navigate("/product/detail");
+        navigate("/seller/product/detail");
     };
 
     const handleChange = (e) => {

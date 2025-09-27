@@ -2,7 +2,7 @@ import { useState } from "react";
 import { loginSeller } from "../../../../api/auth.js";
 import "./login.auth.css"; // file CSS riêng
 
-export default function Login() {
+export default function LoginSeller() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");

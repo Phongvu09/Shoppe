@@ -1,19 +1,34 @@
 import express from "express";
-import { createProduct, updateProduct, getAllProduct, getProduct, deleteProduct } from "../products/products.controller.js";
-import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js"
+import {
+    createProduct,
+    updateProduct,
+    getAllProduct,
+    getProduct,
+    deleteProduct,
+    lockProduct,
+    unlockProduct
+} from "../products/products.controller.js";
+
+import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js";
 import { createProductSchema, updateProductSchema } from "./product.schema.js";
-import { authMiddleware, restrictTo } from "../../common/middleware/auth.js"
+import upload from "../../common/middleware/upload.middleware.js";
+import { authMiddleware, restrictTo } from "../../common/middleware/auth.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
 
 const router = express.Router();
 
-router.get("/", getAllProduct)
-router.get("/:id", getProduct)
+router.get("/", getAllProduct);
+router.get("/:id", getProduct);
+
+// router.use(authMiddleware, restrictTo(USER_ROLE.SELLER))
+router.post("/createProduct", upload.array("images", 5), validBodyRequest(createProductSchema), createProduct);
 
 // router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.MANAGER))
-router.delete("/:id", deleteProduct)
-router.post("/createProduct", validBodyRequest(createProductSchema), createProduct)
-router.patch("/:id", validBodyRequest(updateProductSchema), updateProduct)
+router.patch("/:id", upload.array("images", 5), validBodyRequest(updateProductSchema), updateProduct);
+router.delete("/:id", deleteProduct);
 
+// router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN)
+router.patch("/:id/lock", lockProduct);
+router.patch("/:id/unlock", unlockProduct);
 
 export default router;

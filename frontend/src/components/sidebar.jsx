@@ -25,16 +25,16 @@ export default function Sidebar() {
                     <ul className={`submenu ${openMenu === "shipping" ? "show" : ""}`}>
                         <li>
                             <Link
-                                to="/shipping-form"
-                                className={location.pathname === "/shipping-form" ? "active" : ""}
+                                to="/seller/shipping-form"
+                                className={location.pathname === "/seller/shipping-form" ? "active" : ""}
                             >
                                 Cài đặt vận chuyển
                             </Link>
                         </li>
                         <li>
                             <Link
-                                to="/shop-info"
-                                className={location.pathname === "/shop-info" ? "active" : ""}
+                                to="/seller/shop-info"
+                                className={location.pathname === "/seller/shop-info" ? "active" : ""}
                             >
                                 Địa chỉ lấy hàng
                             </Link>
@@ -97,16 +97,16 @@ export default function Sidebar() {
                         </li>
                         <li>
                             <Link
-                                to="/products/list"
-                                className={location.pathname === "/products/list" ? "active" : ""}
+                                to="/seller/products/list"
+                                className={location.pathname === "/seller/products/list" ? "active" : ""}
                             >
                                 Danh sách sản phẩm
                             </Link>
                         </li>
                         <li>
                             <Link
-                                to="/products/reviews"
-                                className={location.pathname === "/products/reviews" ? "active" : ""}
+                                to="/seller/products/reviews"
+                                className={location.pathname === "/seller/products/reviews" ? "active" : ""}
                             >
                                 Đánh giá sản phẩm
                             </Link>

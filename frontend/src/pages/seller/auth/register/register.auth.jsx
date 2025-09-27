@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { register } from "../../../api/auth.js";
-import "../auth/Register.css";
-import { USER_ROLE } from "../../../../../backend/common/constant/enum.js";
+import { register } from "../../../../api/auth.js";
+import "./register.auth.css";
+import { USER_ROLE } from "../../../../../../backend/common/constant/enum.js";
 
-export default function Register() {
+export default function registerSeller() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");

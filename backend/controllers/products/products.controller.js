@@ -12,7 +12,7 @@ export const getAllProduct = handleAsync(async (req, res) => {
 })
 
 export const getProduct = handleAsync(async (req, res) => {
-    const product = await productService.getProductService(req.param.id)
+    const product = await productService.getProductService(req.params.id)
 
     if (!product) {
         createResponse(res, 400, MESSAGES.NOT_FOUND)
@@ -21,7 +21,7 @@ export const getProduct = handleAsync(async (req, res) => {
 })
 
 export const createProduct = handleAsync(async (req, res) => {
-    const product = await productService.createProductService(req.body)
+    const product = await productService.createProductService(req.body, req.files)
 
     if (!product) {
         createResponse(res, 400, MESSAGES.CREATE_FAILURE)
@@ -30,7 +30,7 @@ export const createProduct = handleAsync(async (req, res) => {
 })
 
 export const updateProduct = handleAsync(async (req, res) => {
-    const product = await productService.updateProductService(req.param.id, req.body)
+    const product = await productService.updateProductService(req.params.id, req.body)
     if (!product) {
         createResponse(res, 400, MESSAGES.UPDATE_FAILURE)
     }
@@ -38,10 +38,28 @@ export const updateProduct = handleAsync(async (req, res) => {
 })
 
 export const deleteProduct = handleAsync(async (req, res) => {
-    const product = await productService.deleteProductService(req.param.id)
+    const product = await productService.deleteProductService(req.params.id)
 
     if (!product) {
         createResponse(res, 400, MESSAGES.DELETE_FAILURE)
     }
     createResponse(res, 200, MESSAGES.DELETE_SUCCESS, product)
 })
+
+export const lockProduct = handleAsync(async (req, res) => {
+    const product = await productService.lockProductService(req.params.id);
+
+    if (!product) {
+        return createResponse(res, 400, MESSAGES.NOT_FOUND);
+    }
+    return createResponse(res, 200, MESSAGES.LOCK_SUCCESS, product);
+});
+
+export const unlockProduct = handleAsync(async (req, res) => {
+    const product = await productService.unlockProductService(req.params.id);
+
+    if (!product) {
+        return createResponse(res, 400, MESSAGES.NOT_FOUND);
+    }
+    return createResponse(res, 200, MESSAGES.UNLOCK_SUCCESS, product);
+});

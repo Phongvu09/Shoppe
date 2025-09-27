@@ -11,7 +11,10 @@ export default function ProductReview() {
     const handleSubmit = async () => {
         try {
             const res = await createProduct(productData);
+            console.log(productData.images);
             console.log("Product created: ", res.data);
+
+
             navigate("/");
         } catch (error) {
             console.error("Error: ", error);
@@ -35,6 +38,7 @@ export default function ProductReview() {
                                     width="100"
                                 />
                             ))}
+                        console.log(productData.images);
                     </div>
                 </section>
 
@@ -60,8 +64,8 @@ export default function ProductReview() {
                 </section>
 
                 <div className="buttons">
-                    <button onClick={() => navigate("/product/sales")}>Quay lại</button>
-                    <button onClick={handleSubmit}>Hoàn tất</button>
+                    <button onClick={() => navigate("/seller/product/sales")}>Quay lại</button>
+                    <button onClick={handleSubmit} >Hoàn tất</button>
                 </div>
             </div>
         </SellerLayout>

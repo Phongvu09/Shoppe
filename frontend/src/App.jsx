@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import Login from "./pages/user/auth/Login.jsx";
 import Register from "./pages/user/auth/Register.jsx";
 import ProductPage from "./pages/product/product.jsx";
@@ -12,7 +12,8 @@ import ProductInfo from "./pages/seller/productManagement/addingProducts/Product
 import ProductSales from "./pages/seller/productManagement/addingProducts/ProductSales.jsx";
 import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
 import SellerLayout from "./components/SellerLayout.jsx";
-import { Outlet } from "react-router-dom";
+import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
+import registerSeller from "./pages/seller/auth/register/register.auth.jsx";
 
 // wrapper để bọc context
 function ProductWrapper() {
@@ -29,6 +30,8 @@ function App() {
       {/* Auth */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/seller/login" element={<LoginSeller />} />
+      <Route path="/seller/register" element={<registerSeller />} />
 
       {/* User Product Page */}
       <Route path="/product" element={<ProductPage />} />
@@ -37,77 +40,63 @@ function App() {
       <Route
         path="/shop-info"
         element={
-          <SellerLayout>
-            <ShopInformation />
-          </SellerLayout>
+          <ShopInformation />
         }
       />
       <Route
-        path="/shipping-form"
+        path="/seller/shipping-form"
         element={
-          <SellerLayout>
-            <ShippingForm />
-          </SellerLayout>
+          <ShippingForm />
         }
       />
       <Route
-        path="/tax-form"
+        path="/seller/tax-form"
         element={
-          <SellerLayout>
-            <TaxForm />
-          </SellerLayout>
+          <TaxForm />
         }
       />
       <Route
-        path="/identity-form"
+        path="/seller/identity-form"
         element={
-          <SellerLayout>
-            <IdentityForm />
-          </SellerLayout>
+          <IdentityForm />
         }
       />
 
-      {/* Seller Product Management */}
-      <Route
-        path="/product/info"
-        element={
-          <SellerLayout>
-            <ProductProvider>
+      {/* Seller Product Management (multi-step form) */}
+      <Route element={<ProductWrapper />}>
+        <Route
+          path="/seller/product/info"
+          element={
+            <SellerLayout>
               <ProductInfo />
-            </ProductProvider>
-          </SellerLayout>
-        }
-      />
-      <Route
-        path="/product/detail"
-        element={
-          <SellerLayout>
-            <ProductProvider>
+            </SellerLayout>
+          }
+        />
+        <Route
+          path="/seller/product/detail"
+          element={
+            <SellerLayout>
               <ProductDetail />
-            </ProductProvider>
-          </SellerLayout>
-        }
-      />
-      <Route
-        path="/product/sales"
-        element={
-          <SellerLayout>
-            <ProductProvider>
+            </SellerLayout>
+          }
+        />
+        <Route
+          path="/seller/product/sales"
+          element={
+            <SellerLayout>
               <ProductSales />
-            </ProductProvider>
-          </SellerLayout>
-        }
-      />
-      <Route
-        path="/product/review"
-        element={
-          <SellerLayout>
-            <ProductProvider>
+            </SellerLayout>
+          }
+        />
+        <Route
+          path="/seller/product/review"
+          element={
+            <SellerLayout>
               <ProductReview />
-            </ProductProvider>
-          </SellerLayout>
-        }
-      />
+            </SellerLayout>
+          }
+        />
+      </Route>
     </Routes>
   );
 }

@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../../models/Users.js";
+import { USER_ROLE } from "../../common/constant/enum.js";
 import {
   signAccessToken,
   signRefreshToken,
@@ -19,6 +20,24 @@ const pickSafeUser = (u) => ({
   role: u.role,
   createdAt: u.createdAt,
 });
+
+/* -------------------- checkHaveUserRole -------------------- */
+export const checkHaveSellerRole = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    const hasSellerRole =
+      user &&
+      user.roles.includes(USER_ROLE.SELLER) &&
+      user.roleStatus?.SELLER === true;
+
+    return res.json({ hasSellerRole });
+  } catch (err) {
+    next(err);
+  }
+};
+
 
 /* -------------------- Auth -------------------- */
 
@@ -87,6 +106,56 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: "Lỗi server" });
   }
 };
+
+export const loginSeller = async (req, res, next) => {
+  try {
+    const email = normalizeEmail(req.body?.email);
+    const password = String(req.body?.password || "");
+
+    const user = await User.findOne({ email }).select("+password +refreshToken");
+    if (!user) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+
+    const ok = await bcrypt.compare(password, user.password);
+    if (!ok) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+
+    // Nếu user chưa có role SELLER, add role
+    if (!user.roles.includes(USER_ROLE.SELLER)) {
+      user.roles = [...new Set([...user.roles, USER_ROLE.USER, USER_ROLE.SELLER])];
+      user.roleStatus.SELLER = true; // mặc định mở quyền SELLER khi cấp role
+      await user.save();
+    }
+
+    // ✅ Check nếu seller bị khóa
+    if (user.roleStatus?.SELLER === false) {
+      return res.status(403).json({ message: "Tài khoản SELLER của bạn đã bị khóa" });
+    }
+
+    const payload = {
+      id: user._id,
+      role: USER_ROLE.SELLER,
+      userId: user.userId,
+      username: user.username,
+    };
+
+    const accessToken = signAccessToken(payload);
+    const newRefresh = signRefreshToken({ id: user._id });
+
+    user.refreshToken = newRefresh;
+    await user.save({ validateBeforeSave: false });
+
+    return res.json({
+      message: "Đăng nhập thành công",
+      accessToken,
+      refreshToken: newRefresh,
+      user: pickSafeUser(user),
+    });
+  } catch (err) {
+    console.error("loginSeller error:", err);
+    return res.status(500).json({ message: "Lỗi server" });
+  }
+};
+
+
 
 // POST /api/user/refresh-token
 export const refreshToken = async (req, res) => {
@@ -289,6 +358,61 @@ export const resetPassword = async (req, res) => {
     await user.save();
 
     return res.json({ message: "Đặt lại mật khẩu thành công" });
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+};
+
+/* -------------------- Lock / Unlock Seller -------------------- */
+
+// PATCH /api/user/:id/lock-seller
+export const lockSeller = async (req, res) => {
+  try {
+    // chỉ ADMIN mới được khóa
+    const isAdmin = Array.isArray(req.user?.role)
+      ? req.user.role.includes(USER_ROLE.ADMIN)
+      : req.user?.role === USER_ROLE.ADMIN;
+
+    if (!isAdmin) return res.status(403).json({ message: "Chỉ ADMIN mới được khóa seller" });
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User không tồn tại" });
+
+    // nếu user không có role SELLER thì không cần khóa
+    if (!user.role.includes(USER_ROLE.SELLER)) {
+      return res.status(400).json({ message: "User này không có role SELLER" });
+    }
+
+    user.roleStatus = { ...user.roleStatus, SELLER: false };
+    await user.save();
+
+    return res.json({ message: "Đã khóa quyền SELLER", user: pickSafeUser(user) });
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+};
+
+// PATCH /api/user/:id/unlock-seller
+export const unlockSeller = async (req, res) => {
+  try {
+    // chỉ ADMIN mới được mở khóa
+    const isAdmin = Array.isArray(req.user?.role)
+      ? req.user.role.includes(USER_ROLE.ADMIN)
+      : req.user?.role === USER_ROLE.ADMIN;
+
+    if (!isAdmin) return res.status(403).json({ message: "Chỉ ADMIN mới được mở khóa seller" });
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User không tồn tại" });
+
+    if (!user.role.includes(USER_ROLE.SELLER)) {
+      return res.status(400).json({ message: "User này không có role SELLER" });
+    }
+
+    user.roleStatus = { ...user.roleStatus, SELLER: true };
+    await user.save();
+
+    return res.json({ message: "Đã mở khóa quyền SELLER", user: pickSafeUser(user) });
   } catch (e) {
     return res.status(500).json({ message: e.message });
   }

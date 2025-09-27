@@ -95,9 +95,17 @@ const productSchema = new mongoose.Schema(
             type: Number,
             default: 0,
         },
+        soldQuantity: {
+            type: Number,
+            default: 0
+        },
         isFeatured: {
             type: Boolean,
             default: false,
+        },
+        isActive: {
+            type: Boolean,
+            default: true,
         },
     },
     {

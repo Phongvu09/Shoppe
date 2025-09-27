@@ -1,13 +1,15 @@
 const MESSAGES = {
-    CREATE_SUCCESS: "Product created successfully",
-    CREATE_FAILURE: "Failed to create product",
-    UPDATE_SUCCESS: "Product updated successfully",
-    UPDATE_FAILURE: "Failed to update product",
-    DELETE_SUCCESS: "Product deleted successfully",
-    DELETE_FAILURE: "Failed to delete product",
-    GET_SUCCESS: "Products get successfully",
-    GET_FAILURE: "Failed to get products",
-    NOT_FOUND: "Product not found",
+    GET_SUCCESS: "Lấy sản phẩm thành công",
+    GET_FAILURE: "Không thể lấy sản phẩm",
+    CREATE_SUCCESS: "Tạo sản phẩm thành công",
+    CREATE_FAILURE: "Tạo sản phẩm thất bại",
+    UPDATE_SUCCESS: "Cập nhật sản phẩm thành công",
+    UPDATE_FAILURE: "Cập nhật sản phẩm thất bại",
+    DELETE_SUCCESS: "Xóa sản phẩm thành công",
+    DELETE_FAILURE: "Xóa sản phẩm thất bại",
+    NOT_FOUND: "Sản phẩm không tồn tại",
+    LOCK_SUCCESS: "Khóa sản phẩm thành công",
+    UNLOCK_SUCCESS: "Mở khóa sản phẩm thành công",
 };
 
 export default MESSAGES;
