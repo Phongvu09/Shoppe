@@ -10,10 +10,29 @@ const router = express.Router();
 router.get("/", getAllShopInformation)
 router.get("/:id", getShopInformationById)
 
-// router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.MANAGER))
-router.delete("/:id", deleteShopInformation)
-router.post("/createShopInformation", validBodyRequest(createShopInformationSchema), createShopInformation)
-router.patch("/:id", validBodyRequest(updateShopInformationSchema), updateShopInformation)
+router.post(
+    "/",
+    authMiddleware,
+    restrictTo(USER_ROLE.SELLER),
+    validBodyRequest(createShopInformationSchema),
+    createShopInformation
+)
+
+router.patch(
+    "/:id",
+    authMiddleware,
+    restrictTo(USER_ROLE.SELLER, USER_ROLE.ADMIN),
+    validBodyRequest(updateShopInformationSchema),
+    updateShopInformation
+)
+
+router.delete(
+    "/:id",
+    authMiddleware,
+    restrictTo(USER_ROLE.ADMIN),
+    deleteShopInformation
+)
+
 
 const shopRouters = router;
 

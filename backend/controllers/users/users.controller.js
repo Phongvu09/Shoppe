@@ -2,6 +2,11 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../../models/Users.js";
+import Shipping from "../ship/shipping.model.js";
+import Shop from "../shopInformation/Shops.model.js"
+import Tax from "../tax/tax.model.js"
+import Identity from "../Identity/identity.model.js"
+
 import { USER_ROLE } from "../../common/constant/enum.js";
 import {
   signAccessToken,
@@ -17,6 +22,7 @@ const pickSafeUser = (u) => ({
   UserId: u.UserId,
   username: u.username,
   email: u.email,
+  password: u.password,
   role: u.role,
   createdAt: u.createdAt,
 });
@@ -29,13 +35,29 @@ export const checkHaveSellerRole = async (req, res, next) => {
 
     const hasSellerRole =
       user &&
-      user.roles.includes(USER_ROLE.SELLER) &&
+      user.role.includes(USER_ROLE.SELLER) &&
       user.roleStatus?.SELLER === true;
 
     return res.json({ hasSellerRole });
   } catch (err) {
     next(err);
   }
+};
+
+/* -------------------- checkSellerCompletion -------------------- */
+export const checkSellerCompletion = async (userId) => {
+  const shop = await Shop.findOne({ userId });
+  const shipping = await Shipping.findOne({ shopId: shop?._id });
+  const tax = await Tax.findOne({ shopId: shop?._id });
+  const identity = await Identity.findOne({ shopId: shop?._id });
+
+  return {
+    shopComplete: !!shop,
+    shippingComplete: !!shipping,
+    taxComplete: !!tax,
+    identityComplete: !!identity,
+    allComplete: !!shop && !!shipping && !!tax && !!identity
+  };
 };
 
 
@@ -57,7 +79,7 @@ export const register = async (req, res) => {
     const user = await User.create({
       username: String(username).trim(),
       email: normEmail,
-      password: hash,               // ✅ lưu mật khẩu đã hash
+      password: password,               // ✅ lưu mật khẩu đã hash
       role: role || ["user"],
     });
 
@@ -76,11 +98,18 @@ export const login = async (req, res) => {
   try {
     const email = normalizeEmail(req.body?.email);
     const password = String(req.body?.password || "");
-    const user = await User.findOne({ email }).select("+password +refreshToken");
-    if (!user) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
 
+    // Lấy user kèm password
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+    }
+
+    // So sánh mật khẩu
     const ok = await bcrypt.compare(password, user.password);
-    if (!ok) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+    if (!ok) {
+      return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
+    }
 
     const payload = {
       id: user._id,
@@ -92,8 +121,10 @@ export const login = async (req, res) => {
     const accessToken = signAccessToken(payload);
     const newRefresh = signRefreshToken({ id: user._id });
 
-    user.refreshToken = newRefresh;            // ✅ lưu refreshToken hiện hành
-    await user.save({ validateBeforeSave: false });
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { refreshToken: newRefresh } }
+    );
 
     return res.json({
       message: "Đăng nhập thành công",
@@ -101,6 +132,7 @@ export const login = async (req, res) => {
       refreshToken: newRefresh,
       user: pickSafeUser(user),
     });
+
   } catch (e) {
     console.error("login error:", e);
     return res.status(500).json({ message: "Lỗi server" });
@@ -118,36 +150,33 @@ export const loginSeller = async (req, res, next) => {
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ message: "Email hoặc mật khẩu không đúng" });
 
-    // Nếu user chưa có role SELLER, add role
-    if (!user.roles.includes(USER_ROLE.SELLER)) {
-      user.roles = [...new Set([...user.roles, USER_ROLE.USER, USER_ROLE.SELLER])];
-      user.roleStatus.SELLER = true; // mặc định mở quyền SELLER khi cấp role
-      await user.save();
+    // Chỉ Seller mới được login
+    if (!user.role.includes(USER_ROLE.SELLER) || user.roleStatus?.SELLER === false) {
+      return res.status(403).json({ message: "Tài khoản SELLER chưa được cấp quyền hoặc đã bị khóa" });
     }
 
-    // ✅ Check nếu seller bị khóa
-    if (user.roleStatus?.SELLER === false) {
-      return res.status(403).json({ message: "Tài khoản SELLER của bạn đã bị khóa" });
-    }
+    // ✅ Kiểm tra completion của Seller
+    const completion = await checkSellerCompletion(user._id);
 
     const payload = {
       id: user._id,
       role: USER_ROLE.SELLER,
-      userId: user.userId,
+      userId: user.UserId,
       username: user.username,
     };
 
     const accessToken = signAccessToken(payload);
-    const newRefresh = signRefreshToken({ id: user._id });
+    const refreshToken = signRefreshToken({ id: user._id });
 
-    user.refreshToken = newRefresh;
+    user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
 
     return res.json({
       message: "Đăng nhập thành công",
       accessToken,
-      refreshToken: newRefresh,
+      refreshToken,
       user: pickSafeUser(user),
+      sellerCompletion: completion // trả về kết quả check
     });
   } catch (err) {
     console.error("loginSeller error:", err);

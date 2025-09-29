@@ -1,7 +1,7 @@
 import Shipping from "./shipping.model.js";
 import { throwError } from "../../common/utils/errror.config.js";
 
-export const createShipping = async (shippingData) => {
+export const createShippingInformation = async (shippingData) => {
     const shipping = await Shipping.create(shippingData);
     return shipping;
 };

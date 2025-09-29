@@ -2,9 +2,10 @@ import mongoose from "mongoose";
 
 const refundSchema = new mongoose.Schema(
     {
+        refundId: { type: String, unique: true, index: true },
         orderId: { type: String, required: true },
-        userId: { type: String, required: true },
-        sellerId: { type: String, required: true },
+        userId: { type: String, required: true },   // người mua
+        shopId: { type: String, required: true }, // người bán
 
         reason: {
             type: String,
@@ -23,13 +24,13 @@ const refundSchema = new mongoose.Schema(
             required: true,
         },
 
-        // Trạng thái dưới dạng flag 
-        isPending: { type: Boolean, default: true },   // chờ xử lý
-        isApproved: { type: Boolean, default: false }, // chấp nhận
-        isRejected: { type: Boolean, default: false }, // từ chối
-        isRefunded: { type: Boolean, default: false }, // đã hoàn tiền
+        status: {
+            type: String,
+            enum: ["PENDING", "APPROVED", "REJECTED", "REFUNDED"],
+            default: "PENDING",
+        },
     },
-    { timestamps: true } // tự động createdAt & updatedAt
+    { timestamps: true, versionKey: false }
 );
 
 const Refunds = mongoose.model("Refund", refundSchema);

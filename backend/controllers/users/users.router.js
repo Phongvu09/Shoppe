@@ -12,9 +12,8 @@ import {
   forgotPassword,
   resetPassword,
   loginSeller,
-  checkHaveSellerRole,
   lockSeller,
-  unlockSeller
+  unlockSeller,
 } from "../users/users.controller.js";
 
 import { authMiddleware as requireAuth, restrictTo as requireRole } from "../../common/middleware/auth.js";
@@ -35,15 +34,16 @@ const router = express.Router();
 /* ---------- Auth ---------- */
 router.post("/register", validate(registerSchema), register);
 router.post("/login", validate(loginSchema), login);
-router.post("/check-seller-role", checkHaveSellerRole)
-router.post("/login-selle", validate(loginSchema), loginSeller)
+router.post("/login-seller", validate(loginSchema), loginSeller)
 router.post("/refresh-token", validate(refreshSchema), refreshToken);  // ✅ 1 dòng duy nhất
 router.get("/me", requireAuth, me);
 router.post("/forgot-password", validate(forgotSchema), forgotPassword);
 router.post("/reset-password", validate(resetSchema), resetPassword);
 
 /* ---------- CRUD ---------- */
-router.get("/", requireAuth, requireRole(USER_ROLE.ADMIN), getAllUser);
+// router.get("/", requireAuth, requireRole(USER_ROLE.ADMIN), getAllUser);
+router.get("/", getAllUser);
+
 router.get("/:id", requireAuth, getUserById);
 router.patch("/:id", requireAuth, validate(updateUserSchema), updateUser);
 router.delete("/:id", requireAuth, requireRole(USER_ROLE.ADMIN), deleteUser);

@@ -8,6 +8,7 @@ import {
     lockProduct,
     unlockProduct
 } from "../products/products.controller.js";
+// import { uploadToCloudinary, upload } from "../../common/utils/uploadToCloudinary.js";
 
 import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js";
 import { createProductSchema, updateProductSchema } from "./product.schema.js";
@@ -21,8 +22,14 @@ router.get("/", getAllProduct);
 router.get("/:id", getProduct);
 
 // router.use(authMiddleware, restrictTo(USER_ROLE.SELLER))
-router.post("/createProduct", upload.array("images", 5), validBodyRequest(createProductSchema), createProduct);
-
+// router.post(
+//     "/",
+//     upload.array("images", 5),
+//     uploadToCloudinary,
+//     validBodyRequest(createProductSchema),
+//     createProduct
+// );
+router.post("/", upload.array("images", 5), createProduct);
 // router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.MANAGER))
 router.patch("/:id", upload.array("images", 5), validBodyRequest(updateProductSchema), updateProduct);
 router.delete("/:id", deleteProduct);

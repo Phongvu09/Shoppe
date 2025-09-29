@@ -44,7 +44,7 @@ const CATEGORY_ENUM = [
 const productSchema = new mongoose.Schema(
     {
         productId: { type: String, unique: true }, // mã sản phẩm tự sinh
-        ownerId: { type: String, required: true },
+        shopId: { type: String, required: true },
         name: {
             type: String,
             required: true,

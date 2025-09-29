@@ -11,8 +11,10 @@ router.get("/", getAllTaxInformation)
 router.get("/:id", getTaxInformationById)
 // router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.MANAGER))
 router.delete("/:id", deleteTaxInformation)
-router.post("/createTaxInformation", validBodyRequest(createTaxInformationSchema), createTaxInformation)
+router.post("/", validBodyRequest(createTaxInformationSchema), createTaxInformation)
 router.patch("/:id", validBodyRequest(updateTaxInformationSchema), updateTaxInformation)
 
 
-export default router;
+const taxRouters = router;
+
+export default taxRouters;

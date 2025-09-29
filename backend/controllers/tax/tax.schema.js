@@ -1,5 +1,5 @@
 import { z } from "zod";
-export const createTaxSchema = z.object({
+export const createTaxInformationSchema = z.object({
     shopId: z.string().min(1, "shopId is required"),
     businessType: z.enum(["Individual", "HouseholdBusiness", "Company"], {
         errorMap: () => ({ message: "Invalid businessType" }),
@@ -24,7 +24,7 @@ export const createTaxSchema = z.object({
     emailForReceivingEInvoices: z.string().email("Invalid email address"),
 }).strict()
 
-export const updateTaxSchema = z.object({
+export const updateTaxInformationSchema = z.object({
     businessType: z.enum(["Individual", "HouseholdBusiness", "Company"], {
         errorMap: () => ({ message: "Invalid businessType" }),
     }),

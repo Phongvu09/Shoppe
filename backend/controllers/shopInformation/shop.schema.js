@@ -1,7 +1,7 @@
 import { z } from "zod";
 // Schema tạo thông tin cửa hàng mới
 export const createShopInformationSchema = z.object({
-    ownerId: z.string().min(1, "OwnerId is required"),
+    userId: z.string().min(1, "UserId is required"),  // đổi lại đây
     shopName: z.string().min(1, "Shop name is required"),
     pickupAddress: z.object({
         receiverName: z.string().min(1, "Receiver name is required"),
@@ -14,6 +14,7 @@ export const createShopInformationSchema = z.object({
     email: z.string().email("Invalid email address"),
     phoneNumber: z.string().min(1, "Phone number is required"),
 }).strict();
+
 
 // Schema cập nhật thông tin cửa hàng
 export const updateShopInformationSchema = z.object({

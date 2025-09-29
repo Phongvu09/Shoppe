@@ -9,3 +9,5 @@ const MESSAGES = {
     DELETE_FAILURE: "Delete identity information failed",
     NOT_FOUND: "Identity information not found"
 };
+
+export default MESSAGES

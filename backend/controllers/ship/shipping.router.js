@@ -11,7 +11,7 @@ router.get("/", getAllShippingInformation)
 router.get("/:id", getShippingInformationById)
 // router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.MANAGER))
 router.delete("/:id", deleteShippingInformation)
-router.post("/createShippingInformation", validBodyRequest(createShippingSchema), createShippingInformation)
+router.post("/", validBodyRequest(createShippingSchema), createShippingInformation)
 router.patch("/:id", validBodyRequest(updateShippingSchema), updateShippingInformation)
 const shipRouters = router;
 

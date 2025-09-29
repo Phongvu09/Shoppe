@@ -21,21 +21,31 @@ export const getProduct = handleAsync(async (req, res) => {
 })
 
 export const createProduct = handleAsync(async (req, res) => {
-    const product = await productService.createProductService(req.body, req.files)
+    try {
+        const product = await productService.createProductService(req.body, req.files);
 
-    if (!product) {
-        createResponse(res, 400, MESSAGES.CREATE_FAILURE)
+        if (!product) {
+            return createResponse(res, 400, MESSAGES.CREATE_FAILURE);
+        }
+
+        return createResponse(res, 200, MESSAGES.CREATE_SUCCESS, product);
+    } catch (err) {
+        console.error("Create product error:", err);
+        return createResponse(res, 500, "Upload hoặc tạo sản phẩm thất bại", { error: err.message });
     }
-    createResponse(res, 200, MESSAGES.CREATE_SUCCESS, product)
-})
+});
 
 export const updateProduct = handleAsync(async (req, res) => {
-    const product = await productService.updateProductService(req.params.id, req.body)
+    // Nếu có req.body.images mới từ middleware
+    const product = await productService.updateProductService(req.params.id, req.body);
+
     if (!product) {
-        createResponse(res, 400, MESSAGES.UPDATE_FAILURE)
+        return createResponse(res, 400, MESSAGES.UPDATE_FAILURE);
     }
-    createResponse(res, 200, MESSAGES.UPDATE_SUCCESS, product)
-})
+    return createResponse(res, 200, MESSAGES.UPDATE_SUCCESS, product);
+});
+
+
 
 export const deleteProduct = handleAsync(async (req, res) => {
     const product = await productService.deleteProductService(req.params.id)

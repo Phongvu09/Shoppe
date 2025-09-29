@@ -1,32 +1,36 @@
 import Shop from "./Shops.model.js";
-import { throwError } from "../../common/utils/errror.config.js";
 
 export const createShopInformation = async (shopData) => {
-    const shop = await Shop.create(shopData);
-    return shop;
+    try {
+        const shop = await Shop.create(shopData);
+        return shop;
+    } catch (err) {
+        if (err.code === 11000) {
+            // lỗi trùng unique key
+            throw new Error("Email hoặc số điện thoại đã tồn tại");
+        }
+        throw err; // ném tiếp lỗi khác
+    }
 };
 
 export const getAllShopInformation = async () => {
-    const shops = await Shop.find();
-    return shops;
+    return await Shop.find();
 };
 
 export const updateShopInformation = async (id, shopData) => {
-    const shop = await Shop.findByIdAndUpdate(id, shopData, {
-        new: true,
-    });
+    const shop = await Shop.findByIdAndUpdate(id, shopData, { new: true });
+    if (!shop) throw new Error("Shop not found");
     return shop;
-}
+};
 
 export const deleteShopInformation = async (id) => {
     const shop = await Shop.findByIdAndDelete(id);
+    if (!shop) throw new Error("Shop not found");
     return shop;
-}
+};
 
 export const getShopInformationById = async (id) => {
     const shop = await Shop.findById(id);
-    if (!shop) {
-        throwError(404, "Shop not found");
-    }
+    if (!shop) throw new Error("Shop not found");
     return shop;
-}
+};

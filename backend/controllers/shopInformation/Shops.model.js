@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const shopSchema = new mongoose.Schema(
     {
-        shopId: {
+        userId: {
             type: String,
             required: true,
             unique: true // mỗi user chỉ có 1 shop
@@ -12,7 +12,7 @@ const shopSchema = new mongoose.Schema(
         pickupAddress: {
             receiverName: { type: String, required: true, trim: true },
             phone: { type: String, required: true },
-            street: { type: String, required: true }, // số nhà, tên đường
+            street: { type: String, required: true },
             ward: { type: String, required: true },
             district: { type: String, required: true },
             city: { type: String, required: true }
@@ -26,8 +26,8 @@ const shopSchema = new mongoose.Schema(
     { versionKey: false }
 );
 
-
-shopSchema.pre("validate", async function (next) {
+// Tự sinh shopId
+shopSchema.pre("save", async function (next) {
     if (!this.shopId) {
         const count = await this.constructor.countDocuments();
         this.shopId = "SH" + (count + 1).toString().padStart(3, "0");

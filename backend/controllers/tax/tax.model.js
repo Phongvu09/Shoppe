@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 const taxSchema = new mongoose.Schema({
     shopId: { type: mongoose.Schema.Types.ObjectId, ref: "Shop", required: true },
     businessType: { type: String, enum: ["Individual", "HouseholdBusiness", "Company"], required: true },
@@ -42,3 +43,5 @@ const taxSchema = new mongoose.Schema({
     taxCode: { type: String, required: true },
     emailForReceivingEInvoices: { type: String, required: true }
 });
+
+export default mongoose.model("Tax", taxSchema);

@@ -9,6 +9,8 @@ import productRoutes from "./controllers/products/products.router.js";
 import shipRoutes from "./controllers/ship/shipping.router.js";
 import authRouter from "./controllers/auth/auth.router.js";
 import shopRouters from "./controllers/shopInformation/shop.router.js";
+import taxRouters from "./controllers/tax/tax.router.js";
+import identityRouters from "./controllers/Identity/identity.router.js";
 
 const app = express();
 
@@ -27,6 +29,8 @@ app.use("/api/product", productRoutes);
 app.use("/api/shipping", shipRoutes);
 app.use("/api/auth", authRouter);
 app.use("/api/shop", shopRouters);
+app.use("/api/tax", taxRouters)
+app.use("/api/identity", identityRouters)
 
 // 404
 app.use((req, res) => {

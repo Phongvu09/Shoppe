@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
     roleStatus: {
       USER: { type: Boolean, default: true },
       SELLER: { type: Boolean, default: true },
-      ADMIN: { type: Boolean, default: true },
+      ADMIN: { type: Boolean, default: false },
     },
 
     refreshToken: { type: String, default: null },

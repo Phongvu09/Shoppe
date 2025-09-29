@@ -47,7 +47,7 @@ const CATEGORY_ENUM = [
 
 export const createProductSchema = z.object({
     ownerId: z.string().min(1, "ownerId is required"),
-    name: z.string().min(5, "Product name is must be at least 5 characters"),
+    name: z.string().min(5, "Product name must be at least 5 characters"),
     description: z.string().min(20, "Description must be at least 20 characters"),
     price: z.number().min(1, "Product price must be at least 1đ"),
     category: z.enum(CATEGORY_ENUM, {
@@ -58,9 +58,19 @@ export const createProductSchema = z.object({
     origin: z.string().optional(),
     material: z.string().optional(),
     weight: z.number().min(1, "Weight must be positive"),
-    images: z.array(imageSchema).min(1, "At least one image is required"),
     stock: z.number().min(0).default(0),
     isFeatured: z.boolean().optional().default(false),
-}).strict();
+}).strict()
+    .refine((data, ctx) => {
+        if (!ctx?.req?.files || ctx.req.files.length === 0) {
+            ctx.addIssue({
+                code: "custom",
+                message: "At least one image is required",
+                path: ["images"],
+            });
+            return false;
+        }
+        return true;
+    });
 
 export const updateProductSchema = createProductSchema.partial();

@@ -1,17 +1,24 @@
 import { z } from "zod";
-export const createShippingSchema = z
-    .object({
-        name: z.string().min(3, "Name must be at least 3 characters long"),
-        address: z.string().min(10, "Address must be at least 10 characters long"),
-        phone: z.string().min(10, "Phone number must be at least 10 characters long"),
-        email: z.string().email("Invalid email address"),
-    })
-    .strict();
-export const updateShippingSchema = z
-    .object({
-        name: z.string().min(3, "Name must be at least 3 characters long").optional(),
-        address: z.string().min(10, "Address must be at least 10 characters long").optional(),
-        phone: z.string().min(10, "Phone number must be at least 10 characters long").optional(),
-        email: z.string().email("Invalid email address").optional(),
-    })
-    .strict();
+
+export const createShippingSchema = z.object({
+    shopId: z.string().min(1, "ShopId is required"),
+    methods: z.array(
+        z.object({
+            name: z.enum(["express", "fast", "pickup", "bulky"]),
+            isActive: z.boolean().optional(),
+            codEnabled: z.boolean().optional(),
+            weightLimit: z.number().optional()
+        })
+    )
+}).strict();
+
+export const updateShippingSchema = z.object({
+    methods: z.array(
+        z.object({
+            name: z.enum(["express", "fast", "pickup", "bulky"]),
+            isActive: z.boolean().optional(),
+            codEnabled: z.boolean().optional(),
+            weightLimit: z.number().optional()
+        })
+    ).optional()
+}).strict();

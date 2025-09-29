@@ -38,7 +38,8 @@ export default function ProductReview() {
                                     width="100"
                                 />
                             ))}
-                        console.log(productData.images);
+
+
                     </div>
                 </section>
 
