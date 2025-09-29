@@ -1,67 +1,47 @@
 import { useState } from "react";
-import { login } from "../../../api/auth.js";
-import "../auth/Login.css"; // file CSS riêng
+import { useNavigate, Link } from "react-router-dom";
+import { login } from "@/api/auth.js";
 
 export default function Login() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+  const nav = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState("");
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setErr("");
+    setLoading(true);
+    try {
+      const { data } = await login(email, password);
+      // BE trả { access_token, user }
+      if (data?.access_token) localStorage.setItem("access_token", data.access_token);
+      nav("/", { replace: true });
+    } catch (e) {
+      setErr(e?.response?.data?.message || "Đăng nhập thất bại");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        try {
-            // gọi API login
-            const res = await login(email, password);
-            console.log("Login success:", res.data);
-
-            // lưu token (nếu backend trả token)
-            localStorage.setItem("token", res.data.token);
-
-            // chuyển trang sau khi đăng nhập thành công
-            window.location.href = "/";
-        } catch (err) {
-            console.log(err);
-            setError(err.response?.data?.message || "Đăng nhập thất bại");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="login-container">
-            <form onSubmit={handleSubmit} className="login-form">
-                <h2>Đăng nhập</h2>
-
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
-
-                <input
-                    type="password"
-                    placeholder="Mật khẩu"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-
-                {error && <p className="error">{error}</p>}
-
-                <button type="submit" disabled={loading}>
-                    {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-                </button>
-
-                <p>
-                    Chưa có tài khoản? <a href="/register">Đăng ký</a>
-                </p>
-            </form>
-        </div>
-    );
+  return (
+    <div className="max-w-[420px] mx-auto px-4 py-10">
+      <h1 className="text-xl font-bold mb-4">Đăng nhập</h1>
+      <form onSubmit={onSubmit} className="space-y-3">
+        <input className="w-full border rounded px-3 py-2" placeholder="Email"
+               value={email} onChange={e=>setEmail(e.target.value)} />
+        <input className="w-full border rounded px-3 py-2" placeholder="Mật khẩu" type="password"
+               value={password} onChange={e=>setPassword(e.target.value)} />
+        {err && <div className="text-red-600 text-sm">{err}</div>}
+        <button disabled={loading}
+          className="w-full bg-[#ee4d2d] text-white py-2 rounded hover:opacity-90">
+          {loading ? "Đang xử lý..." : "Đăng nhập"}
+        </button>
+      </form>
+      <div className="text-sm mt-3">
+        Chưa có tài khoản? <Link to="/register" className="text-[#ee4d2d]">Đăng ký</Link>
+      </div>
+    </div>
+  );
 }
