@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllProducts } from "../../../../api/product.js"; // chỉnh đường dẫn theo cấu trúc dự án của bạn
+import { getAllProducts } from "../../../../api/product.js";
 import "./ProductList.css";
 
 export default function ProductList() {
@@ -11,7 +11,15 @@ export default function ProductList() {
         const fetchProducts = async () => {
             try {
                 const data = await getAllProducts();
-                setProducts(data);
+                console.log("API Products:", data);
+
+                if (Array.isArray(data)) {
+                    setProducts(data);
+                } else if (Array.isArray(data.data)) {
+                    setProducts(data.data);
+                } else {
+                    setError("Dữ liệu sản phẩm không hợp lệ");
+                }
             } catch (err) {
                 setError(err.message || "Lỗi khi tải sản phẩm");
             } finally {
@@ -28,18 +36,43 @@ export default function ProductList() {
         <div className="product-list">
             {products.map((product) => (
                 <div className="product-card" key={product._id}>
+                    {/* Ảnh */}
                     <div className="image-wrapper">
                         <img
-                            src={product.images?.[0]?.url || "https://via.placeholder.com/200"}
+                            src={
+                                product.images?.[0]?.url ||
+                                "https://via.placeholder.com/200"
+                            }
                             alt={product.name}
                         />
                     </div>
+
+                    {/* Thông tin */}
                     <div className="product-info">
-                        <h3>{product.name}</h3>
-                        <p className="price">{product.price.toLocaleString()} đ</p>
-                        <p className="category">{product.category}</p>
+                        <h3 className="name">{product.name}</h3>
+
+                        <p className="price">
+                            {typeof product.price === "number"
+                                ? product.price.toLocaleString() + " đ"
+                                : "Chưa có giá"}
+                        </p>
+
+                        <p className="category">
+                            Danh mục: {product.category || "N/A"}
+                        </p>
+
                         <p className="stock">
-                            {product.stock > 0 ? `Còn ${product.stock} sp` : "Hết hàng"}
+                            {typeof product.stock === "number"
+                                ? product.stock > 0
+                                    ? `Còn ${product.stock} sản phẩm`
+                                    : "Hết hàng"
+                                : "Không rõ tồn kho"}
+                        </p>
+
+                        <p className="desc">
+                            {product.description?.length > 60
+                                ? product.description.slice(0, 60) + "..."
+                                : product.description}
                         </p>
                     </div>
                 </div>

@@ -13,6 +13,7 @@ import ProductSales from "./pages/seller/productManagement/addingProducts/Produc
 import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
 import SellerLayout from "./components/SellerLayout.jsx";
 import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
+import ProductList from "./pages/seller/productManagement/allProducts/ProductList.jsx";
 import registerSeller from "./pages/seller/auth/register/register.auth.jsx";
 
 // wrapper để bọc context
@@ -59,6 +60,12 @@ function App() {
         path="/seller/identity-form"
         element={
           <IdentityForm />
+        }
+      />
+      <Route
+        path="/seller/products/list"
+        element={
+          <ProductList />
         }
       />
 

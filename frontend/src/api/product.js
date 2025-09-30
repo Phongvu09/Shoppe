@@ -36,12 +36,12 @@ export const createProduct = async (productData) => {
         // append file (ảnh)
         if (productData.images && productData.images.length > 0) {
             productData.images.forEach((file) => {
-                formData.append("images", file); // ✅ gửi với key "images"
+                formData.append("images", file);
             });
         }
 
 
-        const res = await api.post("/product/createProduct", formData, {
+        const res = await api.post("/product/", formData, {
             headers: {
                 "Content-Type": "multipart/form-data"
             }
@@ -66,6 +66,23 @@ export async function updateProduct(id, data) {
 export async function deleteProduct(id) {
     try {
         const response = await api.delete(`/product/${id}`);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+}
+
+export async function lockProduct(id, data) {
+    try {
+        const response = await api.patch(`/product/${id}/lock`, data);
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || error.message;
+    }
+}
+export async function unlockProduct(id, data) {
+    try {
+        const response = await api.patch(`/product/${id}/unlock`, data);
         return response.data;
     } catch (error) {
         throw error.response?.data || error.message;
