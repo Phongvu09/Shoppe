@@ -44,7 +44,7 @@ router.post("/reset-password", validate(resetSchema), resetPassword);
 // router.get("/", requireAuth, requireRole(USER_ROLE.ADMIN), getAllUser);
 router.get("/", getAllUser);
 
-router.get("/:id", requireAuth, getUserById);
+router.get("/:id", getUserById);
 router.patch("/:id", requireAuth, validate(updateUserSchema), updateUser);
 router.delete("/:id", requireAuth, requireRole(USER_ROLE.ADMIN), deleteUser);
 router.delete("/", requireAuth, requireRole(USER_ROLE.ADMIN), deleteAllUser);

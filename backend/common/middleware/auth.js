@@ -1,7 +1,7 @@
 // backend/common/middleware/auth.js
 import { verifyAccessToken } from "../utils/jwt.js";
 import { createResponse } from "../configs/respone.config.js";
-
+import { normalizeRoles } from "../utils/normalizeRoles.js";
 /** Lấy token từ header */
 const extractToken = (req) => {
   const auth = req.headers.authorization || "";
@@ -17,32 +17,37 @@ export const authMiddleware = (req, res, next) => {
 
   try {
     const decoded = verifyAccessToken(token);
-    req.user = decoded; // { id, role, ... }
+    if (!decoded || !decoded.role) {
+      return createResponse(res, 401, "Unauthorized: Token invalid or missing role");
+    }
+    req.user = decoded;
     return next();
   } catch (e) {
     return createResponse(res, 401, "Unauthorized: Invalid token");
   }
 };
 
+
 /** Chỉ cho phép các role truyền vào */
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
-    // roles trong token có thể là string hoặc array
-    const userRoles = Array.isArray(req.user?.role)
-      ? req.user.role
-      : [req.user?.role].filter(Boolean);
+    if (!req.user || !req.user.role) {
+      return createResponse(res, 401, "Unauthorized: Missing user or role in token");
+    }
 
-    const allowed = roles.some((r) => userRoles.includes(r));
+    const userRoles = normalizeRoles(req.user.role);
+    const allowed = roles.some((r) => userRoles.includes(r.toUpperCase()));
+
     if (!allowed) {
       return createResponse(
         res,
         403,
-        "Forbidden: You do not have permission to perform this action"
+        `Forbidden: Role ${userRoles.join(", ")} không được phép thực hiện`
       );
     }
+
     return next();
   };
 };
-
 export const requireAuth = authMiddleware;
 export const requireRole = restrictTo;

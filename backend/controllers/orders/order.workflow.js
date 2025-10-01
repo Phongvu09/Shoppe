@@ -1,16 +1,19 @@
-// order.workflow.js
+import { USER_ROLE } from "../../common/constant/enum.js";
+
+// Flow hợp lệ
 export const ALLOWED_STATUS_FLOW = {
-    pending: ["waiting_pickup", "canceled"], // Buyer có thể hủy, Seller có thể xác nhận
-    waiting_pickup: ["processed", "canceled"], // Seller chuẩn bị/giao hoặc hủy
-    processed: ["returned"], // Buyer có thể trả hàng
-    canceled: [], // kết thúc
-    returned: [] // kết thúc
+    pending: ["waiting_pickup", "canceled"],     // từ pending có thể sang waiting_pickup hoặc canceled
+    waiting_pickup: ["processed", "canceled"],   // từ waiting_pickup có thể sang processed hoặc canceled
+    processed: ["returned"],                     // từ processed có thể sang returned
+    canceled: [],                                // kết thúc
+    returned: []                                 // kết thúc
 };
 
+// Ai có quyền đổi từ trạng thái hiện tại
 export const STATUS_ROLE_MAP = {
-    pending: { canChangeTo: ["SELLER", "BUYER", "ADMIN"] },
-    waiting_pickup: { canChangeTo: ["SELLER", "ADMIN"] },
-    processed: { canChangeTo: ["SELLER", "ADMIN"] },
-    canceled: { canChangeTo: ["BUYER", "ADMIN"] },
-    returned: { canChangeTo: ["BUYER", "SELLER", "ADMIN"] }
+    pending: [USER_ROLE.SELLER, USER_ROLE.USER, USER_ROLE.ADMIN],
+    waiting_pickup: [USER_ROLE.SELLER, USER_ROLE.ADMIN],
+    processed: [USER_ROLE.SELLER, USER_ROLE.ADMIN],
+    canceled: [],   // canceled rồi thì thôi
+    returned: []    // returned rồi thì thôi
 };

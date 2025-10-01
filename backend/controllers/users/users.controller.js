@@ -160,10 +160,11 @@ export const loginSeller = async (req, res, next) => {
 
     const payload = {
       id: user._id,
-      role: USER_ROLE.SELLER,
-      userId: user.UserId,
+      role: user.role,       // giữ nguyên array từ DB
+      UserId: user.UserId,
       username: user.username,
     };
+
 
     const accessToken = signAccessToken(payload);
     const refreshToken = signRefreshToken({ id: user._id });
