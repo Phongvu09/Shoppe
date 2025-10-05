@@ -1,7 +1,7 @@
 // src/api/auth.js
 import api from "./api.js";
 
-/** Chuẩn hoá message lỗi */
+// Gom thông điệp lỗi
 function normalizeError(err) {
   const msg =
     err?.response?.data?.message ||
@@ -11,7 +11,7 @@ function normalizeError(err) {
   return new Error(msg);
 }
 
-/** Đăng ký */
+// Đăng ký
 export async function register({ username, email, password }) {
   try {
     const { data } = await api.post("/api/auth/register", {
@@ -19,23 +19,23 @@ export async function register({ username, email, password }) {
       email,
       password,
     });
-    return data;
+    return data; // { message, user?, access_token? } tuỳ BE
   } catch (err) {
     throw normalizeError(err);
   }
 }
 
-/** Đăng nhập user */
+// Đăng nhập
 export async function login(email, password) {
   try {
     const { data } = await api.post("/api/auth/login", { email, password });
-    return data; // { access_token, user } (tuỳ BE)
+    return data; // { access_token, user }
   } catch (err) {
     throw normalizeError(err);
   }
 }
 
-/** Lấy thông tin user hiện tại */
+// Lấy thông tin user hiện tại (nếu BE có)
 export async function getMe() {
   try {
     const { data } = await api.get("/api/auth/me");
@@ -45,7 +45,7 @@ export async function getMe() {
   }
 }
 
-/** Kiểm tra email có role seller không */
+// Kiểm tra role seller theo email (nếu BE có)
 export async function checkHaveSellerRole(email) {
   try {
     const { data } = await api.post("/api/auth/check-seller-role", { email });
@@ -55,7 +55,7 @@ export async function checkHaveSellerRole(email) {
   }
 }
 
-/** Đăng nhập seller (nếu BE tách riêng) */
+// Đăng nhập seller (nếu BE tách riêng)
 export async function loginSeller(email, password) {
   try {
     const { data } = await api.post("/api/auth/login-seller", {
@@ -68,7 +68,7 @@ export async function loginSeller(email, password) {
   }
 }
 
-/** Đăng xuất (nếu BE có), đồng thời xoá token local */
+// Đăng xuất (nếu BE có), đồng thời xoá token local
 export async function logout() {
   try {
     await api.post?.("/api/auth/logout");
