@@ -1,10 +1,6 @@
-const MESSAGES = {
-    LOGIN_SUCCESS: "Login successful",
-    LOGIN_FAILURE: "Login failed",
-    REGISTER_SUCCESS: "Registration successful",
-    REGISTER_FAILURE: "Registration failed",
-    EMAIL_ALREADY_EXISTS: "Email already exists",
-    INVALID_CREDENTIALS: "Invalid email or password",
+export const MESSAGES = {
+  EMAIL_EXISTED: "Email đã tồn tại",
+  REGISTER_SUCCESS: "Đăng ký thành công, vui lòng đăng nhập!",
+  LOGIN_SUCCESS: "Đăng nhập thành công",
+  LOGIN_FAILURE: "Email hoặc mật khẩu không đúng"
 };
-
-export default MESSAGES;

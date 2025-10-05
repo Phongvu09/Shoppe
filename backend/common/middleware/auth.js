@@ -1,48 +1,41 @@
-// backend/common/middleware/auth.js
-import { verifyAccessToken } from "../utils/jwt.js";
-import { createResponse } from "../configs/respone.config.js";
+// ✅ Middleware xác thực & phân quyền cho ESM
+import jwt from "jsonwebtoken";
+import Users from "../../models/Users.js";
 
-/** Lấy token từ header */
-const extractToken = (req) => {
-  const auth = req.headers.authorization || "";
-  if (auth.startsWith("Bearer ")) return auth.slice(7);
-  // fallback: hỗ trợ header khác nếu cần
-  return req.headers["x-access-token"] || null;
-};
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
-/** Yêu cầu có token hợp lệ (Authorization: Bearer <token>) */
-export const authMiddleware = (req, res, next) => {
-  const token = extractToken(req);
-  if (!token) return createResponse(res, 401, "Unauthorized: No token provided");
+/** Lấy token từ header Authorization: Bearer <token> */
+function getTokenFromHeader(req) {
+  const { authorization } = req.headers || {};
+  if (!authorization) return null;
+  const [scheme, token] = authorization.split(" ");
+  if (scheme?.toLowerCase() !== "bearer" || !token) return null;
+  return token.trim();
+}
 
+/** Yêu cầu đăng nhập: verify token, gắn req.user */
+export async function requireAuth(req, res, next) {
   try {
-    const decoded = verifyAccessToken(token);
-    req.user = decoded; // { id, role, ... }
-    return next();
-  } catch (e) {
-    return createResponse(res, 401, "Unauthorized: Invalid token");
+    const token = getTokenFromHeader(req);
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+    const payload = jwt.verify(token, JWT_SECRET); // { id: ... }
+    const user = await Users.findById(payload.id).select("-password");
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Unauthorized" });
   }
-};
+}
 
-/** Chỉ cho phép các role truyền vào */
-export const restrictTo = (...roles) => {
+/** Giới hạn theo role (nếu cần) */
+export function restrictTo(...roles) {
   return (req, res, next) => {
-    // roles trong token có thể là string hoặc array
-    const userRoles = Array.isArray(req.user?.role)
-      ? req.user.role
-      : [req.user?.role].filter(Boolean);
-
-    const allowed = roles.some((r) => userRoles.includes(r));
-    if (!allowed) {
-      return createResponse(
-        res,
-        403,
-        "Forbidden: You do not have permission to perform this action"
-      );
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Forbidden" });
     }
-    return next();
+    next();
   };
-};
-
-export const requireAuth = authMiddleware;
-export const requireRole = restrictTo;
+}

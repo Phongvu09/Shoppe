@@ -1,4 +1,4 @@
-// middlewares/checkOrderPermission.js
+// middleware/checkOrderPermission.js
 import Orders from "../orders/order.model.js";
 import { ALLOWED_STATUS_FLOW, STATUS_ROLE_MAP } from "../orders/order.workflow.js";
 

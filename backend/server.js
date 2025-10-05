@@ -9,15 +9,12 @@ const PORT = process.env.PORT || 5000;
 
 (async () => {
   try {
-    console.log("→ Connecting MongoDB...");
-    await connectDB();
-    console.log("✓ MongoDB connected");
-
-    app.listen(PORT, "0.0.0.0", () => {
-      console.log(`✓ Server running on http://localhost:${PORT}`);
+    await connectDB();                      // log "MongoDB connected" như anh đã có
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
     });
-  } catch (err) {
-    console.error("✗ Failed to start server:", err?.message || err);
+  } catch (e) {
+    console.error("Failed to start server:", e);
     process.exit(1);
   }
 })();

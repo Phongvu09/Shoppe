@@ -14,14 +14,14 @@ import identityRouters from "./controllers/Identity/identity.router.js";
 
 const app = express();
 
-// Middlewares cơ bản
+// Middleware cơ bản
 app.use(helmet());
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); // <— CHỈNH DÒNG NÀY
-app.use(express.json({ limit: "1mb" }));
+app.use(cors({ origin: "http://localhost:5173", credentials: true })); 
+app.use(express.json());
 
 // Rate limit cho toàn bộ /api
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
-app.use("/api", limiter);
+app.use("/api", rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
 
 // Mount routes
 app.use("/api/user", userRoutes);
@@ -32,8 +32,7 @@ app.use("/api/shop", shopRouters);
 app.use("/api/tax", taxRouters)
 app.use("/api/identity", identityRouters)
 
-// Health check
-app.get("/api/health", (req, res) => res.json({ ok: 1, ts: Date.now() }));
+
 // 404
 app.get("/api/health", (req, res) => {
   res.json({ ok: 1, ts: Date.now() });

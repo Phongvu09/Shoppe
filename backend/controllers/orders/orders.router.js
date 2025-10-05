@@ -1,7 +1,7 @@
 import express from "express";
 import * as orderController from "./order.controller.js";
-import { auth } from "../../middlewares/auth.js";
-import { canUpdateStatus } from "../../middlewares/checkOrderPermission.js";
+import { auth } from "../../common/middleware";
+import { canUpdateStatus } from "../../middleware/checkOrderPermission.js";
 import { authMiddleware, restrictTo } from "../../common/middleware/auth.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
 import { createOrderSchema } from "./order.schema.js";

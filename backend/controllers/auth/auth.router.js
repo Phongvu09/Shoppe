@@ -1,14 +1,20 @@
-import express from "express"
-import { authRegister, authLogin, checkHaveSellerRole, loginSeller } from "./auth.controller.js"
-import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js"
-import { authLoginSchema, authRegisterSchema } from "./auth.schema.js"
+import { Router } from "express";
+import {
+  authRegister,
+  authLogin,
+  getMe,
+  logout,
+} from "./auth.controller.js";
+import { requireAuth } from "../../common/middleware/auth.js";
 
-const authRouter = express.Router()
+const router = Router();
 
-authRouter.post("/register", validBodyRequest(authRegisterSchema), authRegister)
-authRouter.post("/login", validBodyRequest(authLoginSchema), authLogin)
-authRouter.post("/check-seller", checkHaveSellerRole)
-authRouter.post("/login-seller", validBodyRequest(authLoginSchema), loginSeller)
+// Auth
+router.post("/register", authRegister);
+router.post("/login", authLogin);
+router.get("/me", requireAuth, getMe);
+router.post("/logout", requireAuth, logout);
 
 
-export default authRouter;
+
+export default router;
