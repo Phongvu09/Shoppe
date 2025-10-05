@@ -1,16 +1,43 @@
-import { useNavigate } from "react-router-dom";
-import { useProduct } from "../addingProducts/ProductContext.jsx";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useProduct } from "../updateProduct/ProductContext.jsx";
+import { useEffect, useState } from "react";
+import { getProductById } from "../../../../api/product.js";
 import SellerLayout from "../../../../components/SellerLayout.jsx";
-import ProgressBar from "../../../../components/ProgressBar/ProgressBar.jsx"; // Thêm ProgressBar
-import "./ProductDetail.css";
+import ProgressBar from "../../../../components/ProgressBar/ProgressBar.jsx";
+import "./UpdateProductDetail.css"; // dùng chung với adding
 
-export default function ProductDetail() {
+export default function UpdateProductDetail() {
     const navigate = useNavigate();
+    const { id } = useParams();
     const { productData, setProductData } = useProduct();
+    const [loading, setLoading] = useState(true);
     const [errors, setErrors] = useState({});
 
-    const validateForm = () => {
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const res = await getProductById(id);
+                const data = res.data;
+                setProductData({
+                    ...productData,
+                    colors: Array.isArray(data.colors) ? data.colors.map(c => c.trim()) : [],
+                    sizes: Array.isArray(data.sizes) ? data.sizes.map(s => s.trim()) : [],
+                    origin: data.origin || "",
+                    weight: data.weight || 0,
+                });
+
+            } catch (err) {
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProduct();
+    }, [id]);
+
+    if (loading) return <p>Đang tải...</p>;
+
+    const handleNext = () => {
         const newErrors = {};
         if (!productData.colors || productData.colors.length === 0)
             newErrors.colors = "Vui lòng nhập ít nhất một màu sắc";
@@ -19,23 +46,31 @@ export default function ProductDetail() {
         if (!productData.origin) newErrors.origin = "Vui lòng nhập nguồn gốc";
         if (!productData.weight || productData.weight <= 0)
             newErrors.weight = "Vui lòng nhập cân nặng hợp lệ";
-        return newErrors;
-    };
 
-    const handleNext = () => {
-        const validationErrors = validateForm();
-        if (Object.keys(validationErrors).length > 0) {
-            setErrors(validationErrors);
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
             return;
         }
-        navigate("/seller/product/sales");
+        navigate("/seller/product/update/sales/" + id);
+    };
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === "colors" || name === "sizes") {
+            setProductData({ ...productData, [name]: value.split(",").map(v => v.trim()) });
+        } else if (name === "weight") {
+            setProductData({ ...productData, weight: Number(value) });
+        } else {
+            setProductData({ ...productData, [name]: value });
+        }
     };
 
     return (
         <SellerLayout>
-            <ProgressBar /> {/* Thêm thanh tiến trình */}
+            <ProgressBar />
             <div className="product-detail">
-                <h2>Thông tin chi tiết</h2>
+                <h2>Cập nhật chi tiết sản phẩm</h2>
+
                 <label>
                     Màu sắc (cách nhau dấu phẩy)
                     <input
@@ -43,15 +78,11 @@ export default function ProductDetail() {
                         name="colors"
                         placeholder="Đỏ, Xanh, Vàng"
                         value={productData.colors.join(", ")}
-                        onChange={(e) =>
-                            setProductData({
-                                ...productData,
-                                colors: e.target.value.split(",").map((c) => c.trim()),
-                            })
-                        }
+                        onChange={handleChange}
                     />
                     {errors.colors && <p className="error">{errors.colors}</p>}
                 </label>
+
                 <label>
                     Kích cỡ (cách nhau dấu phẩy)
                     <input
@@ -59,44 +90,35 @@ export default function ProductDetail() {
                         name="sizes"
                         placeholder="S, M, L"
                         value={productData.sizes.join(", ")}
-                        onChange={(e) =>
-                            setProductData({
-                                ...productData,
-                                sizes: e.target.value.split(",").map((s) => s.trim()),
-                            })
-                        }
+                        onChange={handleChange}
                     />
                     {errors.sizes && <p className="error">{errors.sizes}</p>}
                 </label>
+
                 <label>
                     Nguồn gốc
                     <input
                         type="text"
                         name="origin"
                         value={productData.origin}
-                        onChange={(e) =>
-                            setProductData({ ...productData, origin: e.target.value })
-                        }
+                        onChange={handleChange}
                     />
                     {errors.origin && <p className="error">{errors.origin}</p>}
                 </label>
+
                 <label>
                     Trọng lượng (gram)
                     <input
                         type="number"
                         name="weight"
                         value={productData.weight}
-                        onChange={(e) =>
-                            setProductData({
-                                ...productData,
-                                weight: Number(e.target.value),
-                            })
-                        }
+                        onChange={handleChange}
                     />
                     {errors.weight && <p className="error">{errors.weight}</p>}
                 </label>
+
                 <div className="buttons">
-                    <button onClick={() => navigate("/seller/product/info")}>Quay lại</button>
+                    <button onClick={() => navigate("/seller/product/update/info/" + id)}>Quay lại</button>
                     <button onClick={handleNext}>Tiếp theo</button>
                 </div>
             </div>

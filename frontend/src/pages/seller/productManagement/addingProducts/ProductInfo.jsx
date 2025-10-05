@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { useProduct } from "../addingProducts/ProductContext.jsx";
 import { useState } from "react";
 import SellerLayout from "../../../../components/SellerLayout.jsx";
+import ProgressBar from "../../../../components/ProgressBar/ProgressBar.jsx"; // Thêm ProgressBar
 import "./ProductInfo.css";
 
 export default function ProductInfo() {
@@ -40,6 +41,7 @@ export default function ProductInfo() {
 
     return (
         <SellerLayout>
+            <ProgressBar /> {/* Thêm thanh tiến trình */}
             <div className="product-info">
                 <h2>Thông tin cơ bản</h2>
                 <label>
@@ -47,7 +49,6 @@ export default function ProductInfo() {
                     <input type="file" accept="image/*" multiple onChange={handleFileChange} />
                     {error.images && <p className="error">{error.images}</p>}
                 </label>
-
                 <label>
                     Tên sản phẩm
                     <input
@@ -58,7 +59,6 @@ export default function ProductInfo() {
                     />
                     {error.name && <p className="error">{error.name}</p>}
                 </label>
-
                 <label>
                     Mô tả sản phẩm
                     <textarea
@@ -68,9 +68,8 @@ export default function ProductInfo() {
                     />
                     {error.description && <p className="error">{error.description}</p>}
                 </label>
-
                 <button onClick={handleNext}>Tiếp theo</button>
             </div>
-        </SellerLayout >
+        </SellerLayout>
     );
 }

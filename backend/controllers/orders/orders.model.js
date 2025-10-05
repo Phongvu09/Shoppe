@@ -3,11 +3,12 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema(
     {
         orderId: { type: String, unique: true },
-        userId: { type: String, required: true },
-        shopId: { type: String, required: true },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+        shopId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+
         products: [
             {
-                productId: String,
+                productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
                 name: String,
                 price: Number,
                 quantity: Number,
@@ -16,35 +17,46 @@ const orderSchema = new mongoose.Schema(
                 images: [{ url: String, public_id: String }],
             },
         ],
-        totalPrice: { type: Number, required: true },
 
-        // chỉ dùng 1 field status
+        totalPrice: { type: Number, required: true }, // tổng giá trị sản phẩm
+        shippingMethod: {
+            type: String,
+            enum: ["express", "fast", "pickup", "bulky"],
+            required: true,
+        },
+        shippingFee: { type: Number, required: true, default: 0 },
+        discount: { type: Number, default: 0 },
+        totalAmount: { type: Number, required: true },
+
         status: {
             type: String,
-            enum: [
-                "pending",          // chờ xác nhận
-                "waiting_pickup",   // chờ lấy hàng
-                "processed",        // đã xử lý
-                "canceled",         // đơn hủy
-                "returned",         // trả hàng/hoàn tiền
-                "delivered"         // đã giao xong (hoàn tất)
-            ],
+            enum: ["pending", "waiting_pickup", "processed", "canceled", "returned", "delivered"],
             default: "pending",
         },
-        isLockedByAdmin: { type: Boolean, default: false },
 
+        confirmedAt: Date,
+        shippedAt: Date,
+        deliveredAt: Date,
+        canceledAt: Date,
+
+        isLockedByAdmin: { type: Boolean, default: false },
     },
     { timestamps: true }
 );
 
-// Tạo orderId tự sinh
+// Sinh orderId tự động & tính totalAmount
 orderSchema.pre("validate", async function (next) {
     if (!this.orderId) {
         const count = await this.constructor.countDocuments();
-        this.orderId = "O" + (count + 1).toString().padStart(5, "0");
+        this.orderId = "O" + (count + 1).toString().padStart(6, "0");
     }
     next();
 });
 
-const Orders = mongoose.model("Order", orderSchema);
-export default Orders;
+orderSchema.pre("save", function (next) {
+    this.totalAmount = this.totalPrice + (this.shippingFee || 0) - (this.discount || 0);
+    next();
+});
+
+const Order = mongoose.model("Order", orderSchema);
+export default Order;

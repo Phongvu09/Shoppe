@@ -42,7 +42,6 @@ export const updateOrder = handleAsync(async (req, res) => {
 });
 
 // cập nhật trạng thái riêng
-// orders.controller.js
 export const updateOrderStatus = handleAsync(async (req, res) => {
     const { newStatus } = req.body;
     const { id } = req.params;
@@ -53,4 +52,40 @@ export const updateOrderStatus = handleAsync(async (req, res) => {
     if (!order) return createResponse(res, 400, "Cập nhật trạng thái thất bại");
 
     createResponse(res, 200, "Cập nhật trạng thái thành công", order);
+});
+
+// lấy đơn hàng chờ lấy
+export const getWaitingPickupOrders = handleAsync(async (req, res) => {
+    const { id } = req.params; // id của shop hoặc user
+
+    const orders = await orderService.getWaiting_pickupOrdersService(id);
+
+    if (!orders || orders.length === 0) {
+        return createResponse(res, 404, "Không có đơn hàng chờ lấy");
+    }
+
+    createResponse(res, 200, "Lấy danh sách đơn hàng chờ lấy thành công", orders);
+});
+
+export const getPendingOrders = handleAsync(async (req, res) => {
+    const { id } = req.params; // id của shop hoặc user
+
+    const orders = await orderService.getPendingOrdersService(id);
+
+    if (!orders || orders.length === 0) {
+        return createResponse(res, 404, "Không có đơn hàng chờ lấy");
+    }
+
+    createResponse(res, 200, "Lấy danh sách đơn hàng cần xác nhận thành công", orders);
+});
+
+
+export const confirmOrder = handleAsync(async (req, res) => {
+    const { id } = req.params;
+
+    const order = await orderService.confirmOrderService(id, req.user);
+
+    if (!order) return createResponse(res, 400, "Xác nhận đơn hàng thất bại");
+
+    createResponse(res, 200, "Xác nhận đơn hàng thành công", order);
 });

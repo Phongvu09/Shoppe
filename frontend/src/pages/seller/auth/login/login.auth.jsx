@@ -16,13 +16,12 @@ export default function LoginSeller() {
         try {
             // gọi API login
             const res = await loginSeller(email, password);
-            console.log("Login success:", res.data);
+            console.log("Login success:", res);   // res chính là data
+            localStorage.setItem("accessToken", res.accessToken);
 
-            // lưu token (nếu backend trả token)
-            localStorage.setItem("token", res.data.token);
 
             // chuyển trang sau khi đăng nhập thành công
-            window.location.href = "/";
+            // window.location.href = "/";
         } catch (err) {
             console.log(err);
             setError(err.response?.data?.message || "Đăng nhập thất bại");

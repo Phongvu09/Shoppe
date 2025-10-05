@@ -1,0 +1,75 @@
+.product-sales {
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 25px 30px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.product-sales h2 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+
+.product-sales label {
+    display: block;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #444;
+}
+
+.product-sales input {
+    width: 100%;
+    padding: 10px 12px;
+    margin-top: 6px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+}
+
+.product-sales input:focus {
+    border-color: #ff6600;
+    outline: none;
+}
+
+.product-sales .buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.product-sales button {
+    flex: 1;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.product-sales button:first-child {
+    background: #f0f0f0;
+}
+
+.product-sales button:last-child {
+    background: #ff6600;
+    color: #fff;
+}
+
+.product-sales button:last-child:hover {
+    background: #e65500;
+}
+
+.error {
+    font-size: 13px;
+    color: red;
+    margin-top: 4px;
+}

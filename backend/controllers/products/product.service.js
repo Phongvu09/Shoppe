@@ -1,7 +1,9 @@
 import Products from "./product.model.js";
 import cloudinary from "../../common/configs/cloudinary.js"
 
-export const createProductService = async (productData, files = []) => {
+export const createProductService = async (productData, files = [], shopId) => {
+    console.log("Service received shopId:", shopId); // Thêm log để debug
+    if (!shopId) throw new Error("shopId is required");
     let images = [];
 
     if (files.length > 0) {
@@ -24,7 +26,7 @@ export const createProductService = async (productData, files = []) => {
                 });
             } catch (err) {
                 console.error("Cloudinary upload error:", err);
-                throw err; // break và báo lỗi ngay
+                throw err;
             }
         }
     }
@@ -32,15 +34,67 @@ export const createProductService = async (productData, files = []) => {
     const product = await Products.create({
         ...productData,
         images,
+        shopId,
     });
 
     return product;
 };
 
+export const updateProductService = async (id, productData, files = []) => {
+    const product = await Products.findById(id);
+    if (!product) throw new Error("Product not found");
+
+    // Xóa hết ảnh cũ trên Cloudinary
+    for (const img of product.images) {
+        if (img.public_id) {
+            await cloudinary.uploader.destroy(img.public_id);
+        }
+    }
+
+    // Upload ảnh mới nếu có files
+    const newImages = [];
+    for (const file of files) {
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream({ folder: "products" }, (err, res) => {
+                if (err) return reject(err);
+                resolve(res);
+            });
+            stream.end(file.buffer);
+        });
+        newImages.push({ url: result.secure_url, public_id: result.public_id });
+    }
+
+    // Lưu product với toàn bộ ảnh mới
+    Object.assign(product, { ...productData, images: newImages });
+    await product.save();
+    return product;
+};
+
+
+
 
 export const getAllProductService = async () => {
     const products = await Products.find();
     return products
+}
+
+export const getProductsByShopService = async (shopId, page = 1, limit = 10) => {
+    const skip = (page - 1) * limit; // Tính số lượng sản phẩm cần bỏ qua
+    const products = await Products.find({ shopId })
+        .skip(skip)
+        .limit(limit);
+    const total = await Products.countDocuments({ shopId }); // Đếm tổng số sản phẩm
+    return {
+        products,
+        total,
+        page,
+        totalPages: Math.ceil(total / limit),
+    };
+};
+
+export const getProductByIdService = async (id) => {
+    const product = await Products.findById(id)
+    return product
 }
 
 export const getProductService = async (id) => {
@@ -49,32 +103,24 @@ export const getProductService = async (id) => {
 }
 
 export const deleteProductService = async (id) => {
-    const product = await Products.findByIdAndDelete(id)
-};
-
-export const updateProductService = async (id, productData, files = []) => {
+    // Tìm product theo id
     const product = await Products.findById(id);
-    if (!product) return null;
+    if (!product) throw new Error("Product not found");
 
-    // Upload ảnh mới nếu có
-    if (files.length > 0) {
-        for (const file of files) {
-            const result = await cloudinary.uploader.upload(file.path, {
-                folder: "products",
-            });
-            product.images.push({
-                url: result.secure_url,
-                public_id: result.public_id,
-            });
+    // Xóa ảnh trên Cloudinary nếu có
+    for (const img of product.images || []) {
+        if (img.public_id) {
+            await cloudinary.uploader.destroy(img.public_id);
         }
     }
 
-    // Cập nhật các field khác
-    Object.assign(product, productData);
-    await product.save();
+    // Xóa document khỏi DB
+    await Products.deleteOne({ _id: id });
 
-    return product;
+    return product; // trả về dữ liệu cũ cho frontend
 };
+
+
 
 
 // Khóa sản phẩm

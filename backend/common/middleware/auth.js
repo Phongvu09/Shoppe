@@ -29,25 +29,48 @@ export const authMiddleware = (req, res, next) => {
 
 
 /** Chỉ cho phép các role truyền vào */
+// restrictTo.js
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!req.user || !req.user.role) {
-      return createResponse(res, 401, "Unauthorized: Missing user or role in token");
-    }
+    try {
+      const userRoles = normalizeRoles(req.user?.role); // ["user","seller"]
 
-    const userRoles = normalizeRoles(req.user.role);
-    const allowed = roles.some((r) => userRoles.includes(r.toUpperCase()));
+      if (!userRoles.length) {
+        console.error("❌ Lỗi: Không tìm thấy role trong token", req.user);
+        return createResponse(res, 401, "Unauthorized: Missing user or role in token");
+      }
 
-    if (!allowed) {
-      return createResponse(
-        res,
-        403,
-        `Forbidden: Role ${userRoles.join(", ")} không được phép thực hiện`
+      const allowedRoles = roles.map((r) =>
+        typeof r === "string" ? r.toLowerCase() : String(r).toLowerCase()
       );
-    }
 
-    return next();
+      console.log("🔍 Check roles:", { userRoles, allowedRoles });
+
+      const allowed = allowedRoles.some((r) => userRoles.includes(r));
+
+      if (!allowed) {
+        console.error("❌ Lỗi phân quyền:", {
+          tokenUser: req.user,
+          userRoles,
+          allowedRoles,
+          message: `Role ${userRoles.join(", ")} không được phép`
+        });
+        return createResponse(
+          res,
+          403,
+          `Forbidden: Role ${userRoles.join(", ")} không được phép thực hiện`
+        );
+      }
+
+      next();
+    } catch (err) {
+      console.error("❌ Lỗi không xác định trong restrictTo:", err);
+      return createResponse(res, 500, "Internal Server Error in restrictTo");
+    }
   };
 };
+
+
+
 export const requireAuth = authMiddleware;
 export const requireRole = restrictTo;
