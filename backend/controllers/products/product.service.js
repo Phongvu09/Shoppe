@@ -1,38 +1,6 @@
 import Products from "./product.model.js";
 import cloudinary from "../../common/configs/cloudinary.js"
 
-// createProductService
-// export const createProductService = async (productData, files = []) => {
-//     try {
-//         let images = [];
-//         if (files.length > 0) {
-//             for (const file of files) {
-//                 console.log("Uploading file to Cloudinary:", file.originalname);
-//                 try {
-//                     const result = await cloudinary.uploader.upload_stream({ folder: "products" }, (err, res) => {
-//                         if (err) throw err;
-//                         return res;
-//                     }).end(file.buffer); // dùng buffer thay vì file.path
-
-//                     images.push({ url: result.secure_url, public_id: result.public_id });
-//                     console.log("Uploaded:", result.secure_url);
-//                 } catch (err) {
-//                     console.error("Cloudinary upload error:", err);
-//                     throw err; // break luôn nếu upload fail
-//                 }
-//             }
-//         }
-
-//         const product = await Products.create({ ...productData, images });
-//         console.log("Product created with id:", product._id);
-//         return product;
-
-//     } catch (err) {
-//         console.error("createProductService ERROR:", err);
-//         throw err; // đẩy lên controller
-//     }
-// };
-
 export const createProductService = async (productData, files = []) => {
     let images = [];
 

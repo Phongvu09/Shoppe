@@ -3,12 +3,15 @@ import { createResponse } from "../../common/configs/respone.config.js";
 import { handleAsync } from "../../common/utils/handle-asynce.config.js";
 
 export const createOrder = handleAsync(async (req, res) => {
-    const order = await orderService.createOrderService(req.body);
-    if (!order) return createResponse(res, 400, "Tạo đơn hàng thất bại");
+    try {
+        const order = await orderService.createOrderService(req.body);
+        if (!order) return createResponse(res, 400, "Tạo đơn hàng thất bại");
 
-    createResponse(res, 200, "Tạo đơn hàng thành công", order);
+        createResponse(res, 200, "Tạo đơn hàng thành công", order);
+    } catch (error) {
+        createResponse(res, 400, error.message || "Tạo đơn hàng thất bại");
+    }
 });
-
 export const getAllOrders = handleAsync(async (req, res) => {
     const orders = await orderService.getAllOrdersService();
     if (!orders || orders.length === 0)
@@ -39,9 +42,13 @@ export const updateOrder = handleAsync(async (req, res) => {
 });
 
 // cập nhật trạng thái riêng
+// orders.controller.js
 export const updateOrderStatus = handleAsync(async (req, res) => {
     const { newStatus } = req.body;
-    const order = await orderService.updateOrderStatusService(req.params.id, newStatus);
+    const { id } = req.params;
+
+    // ✅ truyền req.user xuống service
+    const order = await orderService.updateOrderStatusService(id, newStatus, req.user);
 
     if (!order) return createResponse(res, 400, "Cập nhật trạng thái thất bại");
 

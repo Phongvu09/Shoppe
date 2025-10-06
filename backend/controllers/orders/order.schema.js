@@ -17,25 +17,28 @@ const orderProductSchema = z.object({
 
 // Trạng thái của order (chỉ cho phép 1 cái active tại 1 thời điểm)
 const ORDER_STATUS_ENUM = [
-    "PENDING_CONFIRMATION", // chờ xác nhận
-    "WAITING_PICKUP",        // chờ lấy hàng
-    "PROCESSED",             // đã xử lý
-    "CANCELED",              // đơn hủy
-    "RETURNED",              // trả hàng/hoàn tiền
+    "pending",
+    "waiting_pickup",
+    "processed",
+    "canceled",
+    "returned",
+    "delivered",
 ];
 
 export const createOrderSchema = z
     .object({
-        buyerId: z.string().min(1, "buyerId is required"),
-        sellerId: z.string().min(1, "sellerId is required"),
+        userId: z.string().min(1, "userId is required"),
+        shopId: z.string().min(1, "shopId is required"),
         products: z
             .array(orderProductSchema)
             .min(1, "At least one product is required"),
         totalPrice: z.number().min(1, "Total price must be at least 1đ"),
         status: z.enum(ORDER_STATUS_ENUM, {
             errorMap: () => ({ message: "Invalid order status" }),
-        }).default("PENDING_CONFIRMATION"),
+        }).default("pending"),
+        isLockedByAdmin: z.boolean().default(false),
     })
     .strict();
+
 
 export const updateOrderSchema = createOrderSchema.partial();

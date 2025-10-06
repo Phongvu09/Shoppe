@@ -16,6 +16,13 @@ import ProductDetail from "./pages/seller/productManagement/addingProducts/Produ
 import ProductInfo from "./pages/seller/productManagement/addingProducts/ProductInfo.jsx";
 import ProductSales from "./pages/seller/productManagement/addingProducts/ProductSales.jsx";
 import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
+<<<<<<< HEAD
+=======
+import SellerLayout from "./components/SellerLayout.jsx";
+import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
+import ProductList from "./pages/seller/productManagement/allProducts/ProductList.jsx";
+import registerSeller from "./pages/seller/auth/register/register.auth.jsx";
+>>>>>>> a380cd80723a24bd5d7207b7c85ca5cd9f7677c3
 
 import Navbar from "./components/Navbar.jsx";
 
@@ -31,10 +38,91 @@ function ProductWrapper() {
 // Layout chung: Navbar + Outlet
 function AppLayout() {
   return (
+<<<<<<< HEAD
     <>
       <Navbar />
       <Outlet />
     </>
+=======
+    <Routes>
+      {/* Auth */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/seller/login" element={<LoginSeller />} />
+      <Route path="/seller/register" element={<registerSeller />} />
+
+      {/* User Product Page */}
+      <Route path="/product" element={<ProductPage />} />
+
+      {/* Seller */}
+      <Route
+        path="/shop-info"
+        element={
+          <ShopInformation />
+        }
+      />
+      <Route
+        path="/seller/shipping-form"
+        element={
+          <ShippingForm />
+        }
+      />
+      <Route
+        path="/seller/tax-form"
+        element={
+          <TaxForm />
+        }
+      />
+      <Route
+        path="/seller/identity-form"
+        element={
+          <IdentityForm />
+        }
+      />
+      <Route
+        path="/seller/products/list"
+        element={
+          <ProductList />
+        }
+      />
+
+      {/* Seller Product Management (multi-step form) */}
+      <Route element={<ProductWrapper />}>
+        <Route
+          path="/seller/product/info"
+          element={
+            <SellerLayout>
+              <ProductInfo />
+            </SellerLayout>
+          }
+        />
+        <Route
+          path="/seller/product/detail"
+          element={
+            <SellerLayout>
+              <ProductDetail />
+            </SellerLayout>
+          }
+        />
+        <Route
+          path="/seller/product/sales"
+          element={
+            <SellerLayout>
+              <ProductSales />
+            </SellerLayout>
+          }
+        />
+        <Route
+          path="/seller/product/review"
+          element={
+            <SellerLayout>
+              <ProductReview />
+            </SellerLayout>
+          }
+        />
+      </Route>
+    </Routes>
+>>>>>>> a380cd80723a24bd5d7207b7c85ca5cd9f7677c3
   );
 }
 

@@ -11,6 +11,7 @@ import authRouter from "./controllers/auth/auth.router.js";
 import shopRouters from "./controllers/shopInformation/shop.router.js";
 import taxRouters from "./controllers/tax/tax.router.js";
 import identityRouters from "./controllers/Identity/identity.router.js";
+import orderRouter from "./controllers/orders/orders.router.js";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/shop", shopRouters);
 app.use("/api/tax", taxRouters)
 app.use("/api/identity", identityRouters)
+app.use("/api/order/", orderRouter)
 
 
 // 404
