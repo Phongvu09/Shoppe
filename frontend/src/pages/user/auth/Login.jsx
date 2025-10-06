@@ -4,7 +4,6 @@ import { login } from "@/api/auth.js";
 
 export default function Login() {
   const navigate = useNavigate();
-
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -20,32 +19,22 @@ export default function Login() {
     setLoading(true);
 
     try {
+      // Gọi API login
       const res = await login(form.email.trim(), form.password);
+      const token = res?.data?.accessToken;
+      const user = res?.data?.user;
 
-      // Lấy dữ liệu chuẩn từ backend
-      const data = res?.data || res || {};
-      const token =
-        data?.accessToken ||
-        data?.data?.accessToken ||
-        null;
-      const user =
-        data?.user ||
-        data?.data?.user ||
-        null;
-
-      // Nếu backend không trả token => login thất bại
       if (!token || !user) {
         throw new Error("Email hoặc mật khẩu không đúng");
       }
 
-      // Lưu user + token
+      // Lưu token + user
       localStorage.setItem("access_token", token);
       localStorage.setItem("user", JSON.stringify(user));
 
-      // Thông báo cho Navbar cập nhật
+      // Báo cho Navbar cập nhật
       window.dispatchEvent(new Event("auth-changed"));
 
-      // Điều hướng về trang chủ
       alert(`Đăng nhập thành công! Xin chào ${user.username || user.email}`);
       navigate("/");
     } catch (err) {

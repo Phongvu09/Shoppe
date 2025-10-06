@@ -1,67 +1,81 @@
 import { useState } from "react";
-import { loginSeller } from "../../../../api/auth.js";
-import "./login.auth.css"; // file CSS riêng
+import { login } from "@/api/auth.js";
+import "./login.auth.css"; // CSS riêng
 
 export default function LoginSeller() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError("");
-        setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
 
-        try {
-            // gọi API login
-            const res = await loginSeller(email, password);
-            console.log("Login success:", res.data);
+    try {
+      // Gọi API login (hàm login đã return trực tiếp data)
+      const res = await login(email, password);
+      console.log("Login success:", res);
 
-            // lưu token (nếu backend trả token)
-            localStorage.setItem("token", res.data.token);
+      // Lấy đúng giá trị BE trả
+      const token = res?.data?.accessToken;
+      const user = res?.data?.user;
 
-            // chuyển trang sau khi đăng nhập thành công
-            window.location.href = "/";
-        } catch (err) {
-            console.log(err);
-            setError(err.response?.data?.message || "Đăng nhập thất bại");
-        } finally {
-            setLoading(false);
-        }
-    };
+      if (!token || !user) throw new Error("Email hoặc mật khẩu không đúng");
 
-    return (
-        <div className="login-container">
-            <form onSubmit={handleSubmit} className="login-form">
-                <h2>Đăng nhập</h2>
+      // Lưu token và user vào localStorage
+      localStorage.setItem("access_token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                />
+      // Thông báo cập nhật navbar (nếu có)
+      window.dispatchEvent(new Event("auth-changed"));
 
-                <input
-                    type="password"
-                    placeholder="Mật khẩu"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
+      // Chuyển trang sau khi đăng nhập thành công
+      window.location.href = "/";
+    } catch (err) {
+      console.log(err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Đăng nhập thất bại, vui lòng thử lại"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                {error && <p className="error">{error}</p>}
+  return (
+    <div className="login-container">
+      <form onSubmit={handleSubmit} className="login-form">
+        <h2>Đăng nhập Seller</h2>
 
-                <button type="submit" disabled={loading}>
-                    {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-                </button>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
-                <p>
-                    Chưa có tài khoản? <a href="/register">Đăng ký</a>
-                </p>
-            </form>
-        </div>
-    );
+        <input
+          type="password"
+          placeholder="Mật khẩu"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        {error && <p className="error">{error}</p>}
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+        </button>
+
+        <p>
+          Chưa có tài khoản? <a href="/register">Đăng ký</a>
+        </p>
+      </form>
+    </div>
+  );
 }

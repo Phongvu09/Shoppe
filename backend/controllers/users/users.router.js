@@ -16,7 +16,7 @@ import {
   unlockSeller,
 } from "../users/users.controller.js";
 
-import { authMiddleware as requireAuth, restrictTo as requireRole } from "../../common/middleware/auth.js";
+import { requireAuth, restrictTo as requireRole } from "../../common/middleware/auth.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
 
 import { validate } from "../../common/middleware/validate.js";

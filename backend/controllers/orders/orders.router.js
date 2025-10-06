@@ -1,12 +1,7 @@
 import express from "express";
-<<<<<<< HEAD
-import * as orderController from "./order.controller.js";
-import { auth } from "../../common/middleware";
-import { canUpdateStatus } from "../../middleware/checkOrderPermission.js";
-=======
+
 import { createOrder, getOrderById, getAllOrders, updateOrder, updateOrderStatus, deleteOrder } from "./orders.controller.js";
 import { canUpdateStatus } from "../../common/middleware/checkOrderPermisstion.js";
->>>>>>> a380cd80723a24bd5d7207b7c85ca5cd9f7677c3
 import { authMiddleware, restrictTo } from "../../common/middleware/auth.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
 import { createOrderSchema } from "./order.schema.js";

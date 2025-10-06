@@ -1,10 +1,10 @@
+// backend/app.js
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 
-// Đường dẫn import sửa lại (không cần ../backend nữa)
-import userRoutes from "./controllers/users/users.router.js";
+// Import routers
 import productRoutes from "./controllers/products/products.router.js";
 import shipRoutes from "./controllers/ship/shipping.router.js";
 import authRouter from "./controllers/auth/auth.router.js";
@@ -15,39 +15,41 @@ import orderRouter from "./controllers/orders/orders.router.js";
 
 const app = express();
 
-// Middleware cơ bản
+// ---------- Middleware cơ bản ----------
 app.use(helmet());
-app.use(cors({ origin: "http://localhost:5173", credentials: true })); 
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(express.json());
 
-// Rate limit cho toàn bộ /api
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
-app.use("/api", rateLimit({ windowMs: 15 * 60 * 1000, max: 200 }));
+// ---------- Rate limit ----------
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+});
+app.use("/api", limiter);
 
-// Mount routes
-app.use("/api/user", userRoutes);
+// ---------- Mount routes ----------
+app.use("/api/auth", authRouter); // ✅ Auth hợp nhất cho cả user & seller
 app.use("/api/product", productRoutes);
 app.use("/api/shipping", shipRoutes);
-app.use("/api/auth", authRouter);
 app.use("/api/shop", shopRouters);
-app.use("/api/tax", taxRouters)
-app.use("/api/identity", identityRouters)
-app.use("/api/order/", orderRouter)
+app.use("/api/tax", taxRouters);
+app.use("/api/identity", identityRouters);
+app.use("/api/order", orderRouter);
 
-
-// 404
+// ---------- Health check ----------
 app.get("/api/health", (req, res) => {
   res.json({ ok: 1, ts: Date.now() });
 });
+
+// ---------- 404 ----------
 app.use((req, res) => {
   res.status(404).json({ message: "Not Found" });
 });
 
-// Error handler cuối cùng
+// ---------- Error handler ----------
 app.use((err, req, res, next) => {
   console.error(err);
-  const status = err.status || 500;
-  res.status(status).json({ message: err.message || "Internal Server Error" });
+  res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
 });
 
 export default app;
