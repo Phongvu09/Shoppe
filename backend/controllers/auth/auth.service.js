@@ -1,61 +1,41 @@
-import User from "../../models/Users.js";
 import bcrypt from "bcryptjs";
-import { USER_ROLE } from "../../common/constant/enum.js";
+import User from "../../models/Users.js";
 import { signAccessToken } from "../../common/utils/jwt.js";
 
-// ========== Đăng ký ==========
-export const autRegisterService = async ({ username, email, password }) => {
+// ✅ Đăng ký user hoặc seller
+export const registerService = async ({ username, email, password, role }) => {
   const existed = await User.findOne({ email });
   if (existed) return null;
 
-  const hash = await bcrypt.hash(password, 10);
+  // 🔐 Hash mật khẩu chắc chắn 1 lần
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
-  const user = await User.create({
+  const newUser = await User.create({
     username,
     email,
-    password: hash,
-    role: [USER_ROLE.USER],
+    password: hashedPassword,
+    role: role?.map((r) => r.toLowerCase()) || ["user"],
   });
 
-  user.password = undefined;
-  return user;
+  newUser.password = undefined;
+  return newUser;
 };
 
-// ========== Đăng nhập ==========
-export const authLoginService = async ({ email, password }) => {
+// ✅ Đăng nhập
+export const loginService = async ({ email, password }) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user) return { user: null, accessToken: null };
 
+  // So sánh mật khẩu
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) return { user: null, accessToken: null };
-
-  const accessToken = signAccessToken({
-    id: user._id.toString(),
-    role: user.role,
+  console.log("🔍 Login debug:", {
+    enteredPassword: password,
+    hashedPassword: user.password,
+    isMatch,
   });
 
-  user.password = undefined;
-  return { user, accessToken };
-};
-
-// ========== Check role Seller ==========
-export const checkHaveSellerRoleService = async (email) => {
-  const user = await User.findOne({ email });
-  return user && user.role.includes(USER_ROLE.SELLER);
-};
-
-// ========== Đăng nhập Seller ==========
-export const loginSellerService = async ({ email, password }) => {
-  const user = await User.findOne({ email });
-  if (!user) return { user: null, accessToken: null };
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) return { user: null, accessToken: null };
-
-  if (!user.role.includes(USER_ROLE.SELLER)) {
-    user.role.push(USER_ROLE.SELLER);
-    await user.save();
-  }
+  if (!isMatch) return { user: null, accessToken: null };
 
   const accessToken = signAccessToken({
     id: user._id.toString(),
