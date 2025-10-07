@@ -7,12 +7,17 @@ export default function HomePage() {
   const [flashProducts, setFlashProducts] = useState([]);
   const navigate = useNavigate();
 
-  // ===== GỌI API FLASH SALE =====
+  // ===== GỌI API FLASH SALE (nếu có backend thật) =====
   useEffect(() => {
     api
-      .get("/product?limit=6")
-      .then((res) => setFlashProducts(res.data || []))
+      .get("/api/product?limit=6") // ✅ sửa lại đúng prefix /api
+      .then((res) => {
+        if (Array.isArray(res.data)) setFlashProducts(res.data);
+        else if (res.data?.items) setFlashProducts(res.data.items);
+        else throw new Error("Invalid data");
+      })
       .catch(() => {
+        // fallback tĩnh nếu backend chưa có
         setFlashProducts([
           { id: 1, name: "Ốp lưng iPhone", price: 16900, discount: 32, img: "https://picsum.photos/200?1" },
           { id: 2, name: "Áo thun nam", price: 82770, discount: 30, img: "https://picsum.photos/200?2" },
@@ -55,42 +60,42 @@ export default function HomePage() {
 
   const suggestProducts = [
     {
-      id: 1,
+      id: 7,
       img: "https://down-vn.img.susercontent.com/file/sg-11134201-7rdws-lvbe7adpfgrn7a",
       name: "Gấu bông Vịt bông trầm cảm 3 màu",
       price: "180.000₫",
       discount: "-10%",
     },
     {
-      id: 2,
+      id: 8,
       img: "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lm1v84eq9cgc54",
       name: "Giá Treo Quần Áo Đa Dạng",
       price: "150.000₫",
       discount: "-44%",
     },
     {
-      id: 3,
+      id: 9,
       img: "https://down-vn.img.susercontent.com/file/vn-11134201-23030-5bqz1s3nbbnv39",
       name: "Set bộ áo thun chất bozip",
       price: "33.000₫",
       discount: "-45%",
     },
     {
-      id: 4,
+      id: 10,
       img: "https://down-vn.img.susercontent.com/file/sg-11134201-23020-9i3pyjz5pfnv97",
       name: "Tai nghe không dây X55",
       price: "60.000₫",
       discount: "-33%",
     },
     {
-      id: 5,
+      id: 11,
       img: "https://down-vn.img.susercontent.com/file/vn-11134201-23020-j8z6ycptpfnv13",
       name: "Quạt cầm tay mini DIDOOLGT",
       price: "85.000₫",
       discount: "-43%",
     },
     {
-      id: 6,
+      id: 12,
       img: "https://down-vn.img.susercontent.com/file/sg-11134201-7rd3q-lsfjld4pm0d5f5",
       name: "Lược chải tóc mát xa da đầu",
       price: "12.900₫",
@@ -101,7 +106,7 @@ export default function HomePage() {
   // ===== RENDER =====
   return (
     <div className="bg-[#f5f5f5] pb-12">
-      {/* ===== BANNERS ===== */}
+      {/* ===== BANNER ===== */}
       <section className="max-w-[1200px] mx-auto px-4 pt-4 grid gap-4 md:grid-cols-3">
         <img
           onClick={() => navigate("/flashsale")}
@@ -201,9 +206,7 @@ export default function HomePage() {
                 className="w-full h-[150px] object-cover group-hover:scale-105 transition-transform"
               />
               <div className="p-2">
-                <div className="text-sm line-clamp-2 min-h-[32px]">
-                  {p.name}
-                </div>
+                <div className="text-sm line-clamp-2 min-h-[32px]">{p.name}</div>
                 <div className="text-[#ee4d2d] font-bold mt-1">
                   {p.price.toLocaleString()} ₫
                 </div>
@@ -248,9 +251,7 @@ export default function HomePage() {
                   {p.name}
                 </h3>
                 <div className="flex justify-between items-center mt-1">
-                  <span className="text-[#ee4d2d] font-semibold">
-                    {p.price}
-                  </span>
+                  <span className="text-[#ee4d2d] font-semibold">{p.price}</span>
                   <span className="text-gray-400 text-xs">Đã bán 1k+</span>
                 </div>
               </div>

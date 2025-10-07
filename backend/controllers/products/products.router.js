@@ -18,8 +18,12 @@ import { USER_ROLE } from "../../common/constant/enum.js";
 
 const router = express.Router();
 
+// ✅ FE cần 2 route này
 router.get("/", getAllProduct);
 router.get("/:id", getProduct);
+
+// ✅ Seller thêm sản phẩm
+router.post("/", upload.array("images", 5), createProduct);
 
 // router.use(authMiddleware, restrictTo(USER_ROLE.SELLER))
 

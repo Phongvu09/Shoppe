@@ -4,21 +4,20 @@ import * as productService from "./product.service.js"
 import MESSAGES from "./product.message.js"
 
 export const getAllProduct = handleAsync(async (req, res) => {
-    const products = await productService.getAllProductService()
-    if (!products || products.length === 0) {
-        createResponse(res, 400, MESSAGES.GET_FAILURE)
-    }
-    createResponse(res, 200, MESSAGES.GET_SUCCESS, products)
-})
+  const products = await productService.getAllProductService();
+  if (!products || products.length === 0) {
+    return createResponse(res, 404, "Không tìm thấy sản phẩm");
+  }
+  return createResponse(res, 200, "Lấy danh sách sản phẩm thành công", products);
+});
 
 export const getProduct = handleAsync(async (req, res) => {
-    const product = await productService.getProductService(req.params.id)
-
-    if (!product) {
-        createResponse(res, 400, MESSAGES.NOT_FOUND)
-    }
-    createResponse(res, 200, MESSAGES.GET_SUCCESS, product)
-})
+  const product = await productService.getProductService(req.params.id);
+  if (!product) {
+    return createResponse(res, 404, "Không tìm thấy sản phẩm");
+  }
+  return createResponse(res, 200, "Lấy sản phẩm thành công", product);
+});
 
 export const createProduct = handleAsync(async (req, res) => {
     try {

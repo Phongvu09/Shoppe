@@ -11,7 +11,8 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 50,
     },
-
+    phone: { type: String, default: "" },
+    address: { type: String, default: "123 Đường ABC, Quận 1, TP. Hồ Chí Minh" },
     email: {
       type: String,
       required: [true, "Email là bắt buộc"],
