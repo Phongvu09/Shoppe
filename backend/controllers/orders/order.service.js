@@ -4,30 +4,28 @@ import Product from "../products/product.model.js";
 import mongoose from "mongoose";
 import { calculateShippingFee } from "../../common/configs/shipping.config.js";
 
-export const createOrderService = async (orderData) => {
-    // Tính tổng cân nặng của đơn
+export const createOrderService = async (orderData, userId) => {
     let totalWeight = 0;
 
     for (const item of orderData.products) {
         const product = await Product.findById(item.productId);
         if (!product) throw new Error(`Không tìm thấy sản phẩm: ${item.productId}`);
-
-        // mặc định weight lưu trong gram
         totalWeight += (product.weight || 0) * item.quantity;
     }
 
-    // Tính phí ship dựa trên phương thức và cân nặng
     const shippingFee = calculateShippingFee(orderData.shippingMethod, totalWeight);
 
-    // Tạo đơn hàng
     const order = await Order.create({
         ...orderData,
+        userId,
         totalWeight,
         shippingFee,
+        status: "pending",
     });
 
     return order;
 };
+
 
 export const getAllOrdersService = async () => {
     const orders = await Order.find();
@@ -37,6 +35,16 @@ export const getAllOrdersService = async () => {
 export const getOrderByIdService = async (id) => {
     const order = await Order.findById(id);
     return order;
+}
+
+export const getOrderByshopIdService = async (shopId) => {
+    const order = await Order.find({ shopId });
+    return order;
+};
+
+export const getOrdersByOrderIdService = async (orderId) => {
+    const orders = await Order.find({ _id: orderId });
+    return orders;
 };
 
 export const deleteOrderService = async (id) => {
@@ -131,23 +139,20 @@ export const confirmOrderService = async (id, user) => {
         throw new Error("Đơn hàng không ở trạng thái chờ xác nhận");
     }
 
-    // Đổi trạng thái và trừ stock
     const updatedOrder = await updateOrderStatusService(id, "waiting_pickup", user);
-
-    // set confirmedAt
     updatedOrder.confirmedAt = new Date();
     await updatedOrder.save();
-
     return updatedOrder;
 };
 
 
 
-export const getWaiting_pickupOrdersService = async (id) => {
+
+export const getWaitingPickupOrdersService = async (shopId) => {
     try {
         // Lấy tất cả order thuộc shop có status = "waiting_pickup"
         const orders = await Order.find({
-            shopId: id,            // hoặc userId nếu bạn muốn lọc theo người mua
+            shopId: shopId,            // hoặc userId nếu bạn muốn lọc theo người mua
             status: "waiting_pickup"
         })
             .populate("products.productId")   // nếu muốn populate sản phẩm
@@ -161,12 +166,34 @@ export const getWaiting_pickupOrdersService = async (id) => {
     }
 };
 
-export const getPendingOrdersService = async (id) => {
+export const getPendingOrdersService = async (shopId) => {
     try {
+        console.log("shopId in service:", shopId);
+        // Chuyển shopId sang ObjectId
         // Lấy tất cả order thuộc shop có status = "waiting_pickup"
         const orders = await Order.find({
-            shopId: id,            // hoặc userId nếu bạn muốn lọc theo người mua
+            shopId: shopId,            // hoặc userId nếu bạn muốn lọc theo người mua
             status: "pending"
+        })
+            .populate("products.productId")   // nếu muốn populate sản phẩm
+            .populate("userId", "username email") // populate thông tin user
+            .sort({ createdAt: 1 });        // sắp xếp mới nhất
+        console.log("shopId in service:", shopId);
+        console.log("orders in service:", orders);
+        return orders;
+    } catch (error) {
+        console.error("Error in getWaiting_pickupOrderService:", error);
+        throw new Error("Không thể lấy danh sách đơn hàng chờ lấy");
+    }
+};
+
+
+export const getDeliveredOrdersService = async (id) => {
+    try {
+        // Lấy tất cả order thuộc shop có status = "delivered"
+        const orders = await Order.find({
+            shopId: id,            // hoặc userId nếu bạn muốn lọc theo người mua
+            status: "delivered"
         })
             .populate("products.productId")   // nếu muốn populate sản phẩm
             .populate("userId", "username email") // populate thông tin user
@@ -176,5 +203,20 @@ export const getPendingOrdersService = async (id) => {
     } catch (error) {
         console.error("Error in getWaiting_pickupOrderService:", error);
         throw new Error("Không thể lấy danh sách đơn hàng chờ lấy");
+    }
+};
+
+// 📦 Lấy danh sách đơn hàng của người mua (buyer)
+export const getMyOrdersService = async (userId) => {
+    try {
+        const orders = await Order.find({ userId })
+            .populate("products.productId")   // hiện thông tin sản phẩm
+            .populate("shopId", "shopName email") // hiện thông tin shop
+            .sort({ createdAt: -1 }); // mới nhất trước
+
+        return orders;
+    } catch (error) {
+        console.error("Error in getMyOrdersService:", error);
+        throw new Error("Không thể lấy danh sách đơn hàng của bạn");
     }
 };

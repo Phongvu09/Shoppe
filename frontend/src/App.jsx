@@ -15,10 +15,15 @@ import ProductReview from "./pages/seller/productManagement/addingProducts/Produ
 import SellerLayout from "./components/SellerLayout.jsx";
 import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
 import ProductList from "./pages/seller/productManagement/allProducts/ProductList.jsx";
+import ProductDetailPage from "./pages/seller/productManagement/allProducts/ProductDetail.jsx";
 import UpdateProductInfo from "./pages/seller/productManagement/updateProduct/UpdateProductInfo.jsx";
 import UpdateProductDetail from "./pages/seller/productManagement/updateProduct/UpdateProductDetail.jsx";
 import UpdateProductReview from "./pages/seller/productManagement/updateProduct/UpdateProductReview.jsx";
 import UpdateProductSales from "./pages/seller/productManagement/updateProduct/UpdateProductSales.jsx";
+import PendingOrders from "./pages/seller/orderManagement/allOrders/PendingOrders.jsx";
+import WaitingPickupOrders from "./pages/seller/orderManagement/allOrders/WaitingPickupOrders.jsx";
+import DeliveredOrders from "./pages/seller/orderManagement/allOrders/DeliveredOrders.jsx";
+import SellerOrders from "./pages/seller/orderManagement/allOrderByShop/SellerOrders.jsx";
 // ------------------- Wrappers -------------------
 
 // Wrapper cho adding product
@@ -68,6 +73,49 @@ function App() {
         element={
           <SellerLayout>
             <ProductList />
+          </SellerLayout>
+        }
+      />
+      <Route
+        path="/seller/products/detail/:id"
+        element={
+          <SellerLayout>
+            <ProductDetailPage />
+          </SellerLayout>
+        }
+      />
+
+      {/* Order Status */}
+
+      <Route
+        path="/seller/orders/pending"
+        element={
+          <SellerLayout>
+            <PendingOrders />
+          </SellerLayout>
+        }
+      />
+      <Route
+        path="/seller/orders/waiting-pickup"
+        element={
+          <SellerLayout>
+            <WaitingPickupOrders />
+          </SellerLayout>
+        }
+      />
+      <Route
+        path="/seller/orders/delivered"
+        element={
+          <SellerLayout>
+            <DeliveredOrders />
+          </SellerLayout>
+        }
+      />
+      <Route
+        path="/seller/orders/allOrders"
+        element={
+          <SellerLayout>
+            <SellerOrders />
           </SellerLayout>
         }
       />

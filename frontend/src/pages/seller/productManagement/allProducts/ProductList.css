@@ -74,34 +74,7 @@
     border-radius: 4px;
 }
 
-/* Action buttons */
-.action-btn {
-    padding: 6px 12px;
-    margin-right: 8px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease;
-}
 
-.edit-btn {
-    background-color: #007bff;
-    color: #fff;
-}
-
-.edit-btn:hover {
-    background-color: #0056b3;
-}
-
-.delete-btn {
-    background-color: #dc3545;
-    color: #fff;
-}
-
-.delete-btn:hover {
-    background-color: #c82333;
-}
 
 /* Pagination */
 .pagination {
@@ -189,4 +162,54 @@
     .page-info {
         order: -1;
     }
+}
+
+/* -------------------- Action Buttons (Shopee style) -------------------- */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    margin-right: 8px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+.detail-btn {
+    background-color: #fff;
+    color: #ee4d2d;
+    border: 1px solid #ee4d2d;
+}
+
+.detail-btn:hover {
+    background-color: #ee4d2d;
+    color: #fff;
+}
+
+.edit-btn {
+    background-color: #007bff;
+    color: #fff;
+    border: 1px solid #007bff;
+
+}
+
+.edit-btn:hover {
+    background-color: #0056b3;
+}
+
+
+
+.delete-btn {
+    background-color: #fff;
+    color: #dc3545;
+    border: 1px solid #dc3545;
+}
+
+.delete-btn:hover {
+    background-color: #dc3545;
+    color: #fff;
 }

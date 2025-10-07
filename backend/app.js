@@ -19,6 +19,7 @@ const app = express();
 app.use(helmet());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true }));
 
 // Rate limit cho toàn bộ /api
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
@@ -32,7 +33,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/shop", shopRouters);
 app.use("/api/tax", taxRouters)
 app.use("/api/identity", identityRouters)
-app.use("/api/order/", orderRouter)
+app.use("/api/order", orderRouter)
 
 // 404
 app.use((req, res) => {

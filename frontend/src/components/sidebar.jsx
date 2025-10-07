@@ -53,24 +53,24 @@ export default function Sidebar() {
                     <ul className={`submenu ${openMenu === "orders" ? "show" : ""}`}>
                         <li>
                             <Link
-                                to="/orders/pending"
-                                className={location.pathname === "/orders/pending" ? "active" : ""}
+                                to="/seller/orders/pending"
+                                className={location.pathname === "/seller/orders/pending" ? "active" : ""}
                             >
                                 Đơn chờ xử lý
                             </Link>
                         </li>
                         <li>
                             <Link
-                                to="/orders/shipped"
-                                className={location.pathname === "/orders/shipped" ? "active" : ""}
+                                to="/seller/orders/waiting-pickup"
+                                className={location.pathname === "/seller/orders/waiting-pickup" ? "active" : ""}
                             >
-                                Đơn đã gửi
+                                Đơn chờ lấy hàng
                             </Link>
                         </li>
                         <li>
                             <Link
-                                to="/orders/completed"
-                                className={location.pathname === "/orders/completed" ? "active" : ""}
+                                to="/seller/orders/delivered"
+                                className={location.pathname === "/seller/orders/delivered" ? "active" : ""}
                             >
                                 Đơn hoàn thành
                             </Link>

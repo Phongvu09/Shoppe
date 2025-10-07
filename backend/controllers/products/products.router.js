@@ -19,7 +19,6 @@ import { USER_ROLE } from "../../common/constant/enum.js";
 const router = express.Router();
 
 router.get("/", getAllProduct);
-// router.get("/:id", getProduct);
 
 // ✅ cần token seller
 router.use(authMiddleware, restrictTo(USER_ROLE.SELLER));

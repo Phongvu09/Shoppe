@@ -1,0 +1,55 @@
+.waiting-pickup-orders {
+    padding: 20px;
+    background-color: #f9f9f9;
+    min-height: 80vh;
+}
+
+.waiting-pickup-orders h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.waiting-pickup-orders table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.waiting-pickup-orders th,
+.waiting-pickup-orders td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.waiting-pickup-orders th {
+    background-color: #fafafa;
+    color: #555;
+    font-weight: 600;
+}
+
+.waiting-pickup-orders tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.status.waiting_pickup {
+    color: #2196f3;
+    font-weight: 500;
+}
+
+button {
+    padding: 6px 12px;
+    border: none;
+    background-color: #007aff;
+    color: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #005bb5;
+}

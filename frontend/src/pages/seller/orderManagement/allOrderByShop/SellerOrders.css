@@ -1,0 +1,37 @@
+.seller-orders {
+    padding: 20px;
+    background: #fff;
+}
+
+.orders-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.orders-table th,
+.orders-table td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.orders-table th {
+    background-color: #f4f4f4;
+}
+
+.status {
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.status.pending {
+    color: orange;
+}
+
+.status.delivered {
+    color: green;
+}
+
+.status.canceled {
+    color: red;
+}

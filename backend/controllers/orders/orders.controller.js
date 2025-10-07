@@ -4,7 +4,9 @@ import { handleAsync } from "../../common/utils/handle-asynce.config.js";
 
 export const createOrder = handleAsync(async (req, res) => {
     try {
-        const order = await orderService.createOrderService(req.body);
+        const userId = req.user?.id; // lấy id từ token
+        const order = await orderService.createOrderService(req.body, userId);
+
         if (!order) return createResponse(res, 400, "Tạo đơn hàng thất bại");
 
         createResponse(res, 200, "Tạo đơn hàng thành công", order);
@@ -12,30 +14,57 @@ export const createOrder = handleAsync(async (req, res) => {
         createResponse(res, 400, error.message || "Tạo đơn hàng thất bại");
     }
 });
+
 export const getAllOrders = handleAsync(async (req, res) => {
-    const orders = await orderService.getAllOrdersService();
+    const userId = req.user?.id;
+    const orders = await orderService.getAllOrdersService(userId);
+
     if (!orders || orders.length === 0)
         return createResponse(res, 400, "Không tìm thấy đơn hàng");
 
     createResponse(res, 200, "Lấy danh sách đơn hàng thành công", orders);
 });
 
-export const getOrderById = handleAsync(async (req, res) => {
-    const order = await orderService.getOrderByIdService(req.params.id);
+export const getOrderByshopId = handleAsync(async (req, res) => {
+    const shopId = req.user?.id;
+    const order = await orderService.getOrderByshopIdService(shopId);
+
     if (!order) return createResponse(res, 404, "Đơn hàng không tồn tại");
 
     createResponse(res, 200, "Lấy đơn hàng thành công", order);
 });
 
+export const getOrderById = handleAsync(async (req, res) => {
+    const userId = req.user?.id;
+    const order = await orderService.getOrderByIdService(userId);
+
+    if (!order) return createResponse(res, 404, "Đơn hàng không tồn tại");
+
+    createResponse(res, 200, "Lấy đơn hàng thành công", order);
+});
+
+export const getOrderByOrderId = handleAsync(async (req, res) => {
+    const { orderId } = req.params;
+    const orders = await orderService.getOrdersByOrderIdService(orderId);
+    if (!orders || orders.length === 0) {
+        return createResponse(res, 404, "Không tìm thấy đơn hàng");
+    }
+    createResponse(res, 200, "Lấy đơn hàng thành công", orders);
+});
+
 export const deleteOrder = handleAsync(async (req, res) => {
-    const order = await orderService.deleteOrderService(req.params.id);
+    const userId = req.user?.id;
+    const order = await orderService.deleteOrderService(req.params.id, userId);
+
     if (!order) return createResponse(res, 404, "Xóa đơn hàng thất bại");
 
     createResponse(res, 200, "Xóa đơn hàng thành công", order);
 });
 
 export const updateOrder = handleAsync(async (req, res) => {
-    const order = await orderService.updateOrderService(req.params.id, req.body);
+    const userId = req.user?.id;
+    const order = await orderService.updateOrderService(req.params.id, req.body, userId);
+
     if (!order) return createResponse(res, 400, "Cập nhật đơn hàng thất bại");
 
     createResponse(res, 200, "Cập nhật đơn hàng thành công", order);
@@ -46,7 +75,7 @@ export const updateOrderStatus = handleAsync(async (req, res) => {
     const { newStatus } = req.body;
     const { id } = req.params;
 
-    // ✅ truyền req.user xuống service
+    // gửi toàn bộ req.user (có id + role)
     const order = await orderService.updateOrderStatusService(id, newStatus, req.user);
 
     if (!order) return createResponse(res, 400, "Cập nhật trạng thái thất bại");
@@ -54,11 +83,13 @@ export const updateOrderStatus = handleAsync(async (req, res) => {
     createResponse(res, 200, "Cập nhật trạng thái thành công", order);
 });
 
+
 // lấy đơn hàng chờ lấy
 export const getWaitingPickupOrders = handleAsync(async (req, res) => {
-    const { id } = req.params; // id của shop hoặc user
+    console.log(req.user);
+    const shopId = req.user?.id;
 
-    const orders = await orderService.getWaiting_pickupOrdersService(id);
+    const orders = await orderService.getWaitingPickupOrdersService(shopId);
 
     if (!orders || orders.length === 0) {
         return createResponse(res, 404, "Không có đơn hàng chờ lấy");
@@ -68,24 +99,52 @@ export const getWaitingPickupOrders = handleAsync(async (req, res) => {
 });
 
 export const getPendingOrders = handleAsync(async (req, res) => {
-    const { id } = req.params; // id của shop hoặc user
+    const shopId = req.user?.id;
 
-    const orders = await orderService.getPendingOrdersService(id);
+    const orders = await orderService.getPendingOrdersService(shopId);
+
+    console.log("shopId:", shopId);
+    console.log("orders:", orders);
 
     if (!orders || orders.length === 0) {
-        return createResponse(res, 404, "Không có đơn hàng chờ lấy");
+        return createResponse(res, 404, "Không có đơn hàng cần xác nhận");
     }
 
     createResponse(res, 200, "Lấy danh sách đơn hàng cần xác nhận thành công", orders);
 });
 
+export const getDeliveredOrders = handleAsync(async (req, res) => {
+    const userId = req.user?.id;
+
+    const orders = await orderService.getDeliveredOrdersService(userId);
+
+    if (!orders || orders.length === 0) {
+        return createResponse(res, 404, "Không có đơn hàng đã giao");
+    }
+
+    createResponse(res, 200, "Lấy danh sách đơn hàng đã giao thành công", orders);
+});
 
 export const confirmOrder = handleAsync(async (req, res) => {
     const { id } = req.params;
+    const userId = req.user?.id;
 
-    const order = await orderService.confirmOrderService(id, req.user);
+    const order = await orderService.confirmOrderService(id, userId);
 
     if (!order) return createResponse(res, 400, "Xác nhận đơn hàng thất bại");
 
     createResponse(res, 200, "Xác nhận đơn hàng thành công", order);
+});
+
+// 📦 Lấy danh sách đơn hàng của người mua
+export const getMyOrders = handleAsync(async (req, res) => {
+    const userId = req.user?.id;
+
+    const orders = await orderService.getMyOrdersService(userId);
+
+    if (!orders || orders.length === 0) {
+        return createResponse(res, 404, "Bạn chưa có đơn hàng nào");
+    }
+
+    createResponse(res, 200, "Lấy danh sách đơn hàng của bạn thành công", orders);
 });

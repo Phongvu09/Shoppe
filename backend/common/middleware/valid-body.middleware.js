@@ -2,6 +2,8 @@ import { throwError } from "../utils/errror.config.js";
 
 export const validBodyRequest = (schema) => (req, res, next) => {
     try {
+        console.log("DEBUG req.body:", req.body);
+
         const data = schema.parse(req.body);
         req.body = data;
         next();
@@ -12,6 +14,7 @@ export const validBodyRequest = (schema) => (req, res, next) => {
                 .join(";");
             return throwError(400, allMessages || "Invalid request");
         }
+        console.log("Unexpected validation error:", error);
         return throwError(400, "Invalid request");
     }
 };

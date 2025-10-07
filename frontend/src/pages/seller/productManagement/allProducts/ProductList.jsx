@@ -98,10 +98,16 @@ export default function ProductList() {
                                 <td>{product.isActive ? "Hoạt động" : "Đã khóa"}</td>
                                 <td>
                                     <button
-                                        className="action-btn edit-btn"
+                                        className="action-btn detail-btn"
+                                        onClick={() => navigate(`/seller/products/detail/${product._id}`)}
+                                    >
+                                        Chi tiết
+                                    </button>
+                                    <button
+                                        className="action-btn detail-btn"
                                         onClick={() => handleEditProduct(product._id)}
                                     >
-                                        Sửa
+                                        Chỉnh sửa
                                     </button>
                                     <button
                                         className="action-btn delete-btn"
@@ -110,6 +116,7 @@ export default function ProductList() {
                                         Xóa
                                     </button>
                                 </td>
+
                             </tr>
                         ))}
                     </tbody>

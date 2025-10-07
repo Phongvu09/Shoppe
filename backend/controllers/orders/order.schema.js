@@ -15,7 +15,6 @@ const orderProductSchema = z.object({
     images: z.array(imageSchema).min(1, "At least one image is required"),
 });
 
-// Trạng thái của order (chỉ cho phép 1 cái active tại 1 thời điểm)
 const ORDER_STATUS_ENUM = [
     "pending",
     "waiting_pickup",
@@ -27,18 +26,21 @@ const ORDER_STATUS_ENUM = [
 
 export const createOrderSchema = z
     .object({
-        userId: z.string().min(1, "userId is required"),
+        // ❌ bỏ userId — vì bạn set từ token
         shopId: z.string().min(1, "shopId is required"),
         products: z
             .array(orderProductSchema)
             .min(1, "At least one product is required"),
         totalPrice: z.number().min(1, "Total price must be at least 1đ"),
-        status: z.enum(ORDER_STATUS_ENUM, {
-            errorMap: () => ({ message: "Invalid order status" }),
-        }).default("pending"),
+
+        // ✅ thêm các trường đang gửi từ client
+        shippingMethod: z.enum(["express", "fast", "pickup", "bulky"]),
+        shippingFee: z.number().default(0),
+        discount: z.number().default(0),
+        totalAmount: z.number().min(1, "Total amount is required"),
+
+        // optional mặc định
+        status: z.enum(ORDER_STATUS_ENUM).default("pending"),
         isLockedByAdmin: z.boolean().default(false),
     })
-    .strict();
-
-
-export const updateOrderSchema = createOrderSchema.partial();
+    .strict(); // có thể bỏ .strict() nếu bạn muốn chấp nhận thêm field không cần validate
