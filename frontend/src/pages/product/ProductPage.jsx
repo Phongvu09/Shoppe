@@ -6,15 +6,17 @@ export default function ProductPage() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/api/product");
-        setProducts(data.items || data);
-      } catch (e) {
-        console.error("Fetch product error:", e.message);
-      }
-    })();
-  }, []);
+  (async () => {
+    try {
+      const { data } = await api.get("/api/product");
+      const items = data?.items || data || [];
+      setProducts(Array.isArray(items) ? items : []);
+    } catch (e) {
+      console.error("Fetch product error:", e.message);
+      setProducts([]); // fallback an toàn
+    }
+  })();
+}, []);
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 mt-6">

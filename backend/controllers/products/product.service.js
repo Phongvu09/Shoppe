@@ -39,14 +39,17 @@ export const createProductService = async (productData, files = []) => {
 
 
 export const getAllProductService = async () => {
-    const products = await Products.find();
-    return products
-}
+  const products = await Products.find()
+    .select("name price discount description images"); 
+  return products;
+};
 
 export const getProductService = async (id) => {
-    const product = await Products.findById(id)
-    return product
-}
+  const product = await Products.findById(id).select("name price discount description images");
+  return product;
+};
+
+
 
 export const deleteProductService = async (id) => {
     const product = await Products.findByIdAndDelete(id)

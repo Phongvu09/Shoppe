@@ -1,13 +1,16 @@
 // src/App.jsx
 import { Routes, Route, Outlet, Navigate } from "react-router-dom";
 
-// User
+// ===== User Pages =====
 import HomePage from "./pages/home/HomePage.jsx";
 import Login from "./pages/user/auth/Login.jsx";
 import Register from "./pages/user/auth/Register.jsx";
-import ProductPage from "./pages/product/product.jsx";
+import ProductPage from "./pages/product/ProductPage.jsx";
+import ProductDetail from "./pages/product/ProductDetail.jsx";
+import SearchResult from "./pages/SearchResult.jsx";
+import Checkout from "./pages/cart/Checkout.jsx"; // ✅ Trang thanh toán
 
-// Seller Auth
+// ===== Seller Auth =====
 import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
 import RegisterSeller from "./pages/seller/auth/register/register.auth.jsx";
 import ShopInformation from "./pages/seller/auth/shopInformationForm/shopInformation.jsx";
@@ -15,19 +18,21 @@ import ShippingForm from "./pages/seller/auth/ShippingForm/ShippingForm.jsx";
 import TaxForm from "./pages/seller/auth/TaxForm/TaxForm.jsx";
 import IdentityForm from "./pages/seller/auth/IdentityForm/IdentityForm.jsx";
 
-// Seller Layout & Product
+// ===== Seller Layout & Product =====
 import SellerLayout from "./components/SellerLayout.jsx";
 import ProductList from "./pages/seller/productManagement/allProducts/ProductList.jsx";
 import { ProductProvider } from "./pages/seller/productManagement/addingProducts/ProductContext.jsx";
-import ProductDetail from "./pages/seller/productManagement/addingProducts/ProductDetail.jsx";
 import ProductInfo from "./pages/seller/productManagement/addingProducts/ProductInfo.jsx";
+import ProductDetailSeller from "./pages/seller/productManagement/addingProducts/ProductDetail.jsx";
 import ProductSales from "./pages/seller/productManagement/addingProducts/ProductSales.jsx";
 import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
 
-// Common
+// ===== Common Components =====
 import Navbar from "./components/Navbar.jsx";
 
-// ---------- Product Wrapper ----------
+// ============================
+//   PRODUCT WRAPPER (Context)
+// ============================
 function ProductWrapper() {
   return (
     <ProductProvider>
@@ -36,7 +41,9 @@ function ProductWrapper() {
   );
 }
 
-// ---------- App Layout ----------
+// ============================
+//         MAIN LAYOUT
+// ============================
 function AppLayout() {
   return (
     <>
@@ -46,16 +53,22 @@ function AppLayout() {
   );
 }
 
-// ---------- Main App ----------
+// ============================
+//           APP
+// ============================
 export default function App() {
   return (
     <Routes>
-      {/* Layout chính có Navbar */}
+      {/* ========= Layout chính có Navbar ========= */}
       <Route element={<AppLayout />}>
+        {/* ✅ Trang người dùng */}
         <Route path="/" element={<HomePage />} />
         <Route path="/product" element={<ProductPage />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/search" element={<SearchResult />} />
+        <Route path="/checkout" element={<Checkout />} /> {/* ✅ Trang thanh toán */}
 
-        {/* Seller */}
+        {/* ✅ Seller */}
         <Route path="/seller/login" element={<LoginSeller />} />
         <Route path="/seller/register" element={<RegisterSeller />} />
         <Route path="/shop-info" element={<ShopInformation />} />
@@ -63,6 +76,7 @@ export default function App() {
         <Route path="/seller/tax-form" element={<TaxForm />} />
         <Route path="/seller/identity-form" element={<IdentityForm />} />
 
+        {/* ✅ Seller Product Management */}
         <Route element={<ProductWrapper />}>
           <Route path="/seller/products/list" element={<ProductList />} />
           <Route
@@ -77,7 +91,7 @@ export default function App() {
             path="/seller/product/detail"
             element={
               <SellerLayout>
-                <ProductDetail />
+                <ProductDetailSeller />
               </SellerLayout>
             }
           />
@@ -100,11 +114,11 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* Auth pages nằm ngoài Layout (không hiện Navbar) */}
+      {/* ========= Auth pages nằm ngoài Layout ========= */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* 404 */}
+      {/* ✅ Nếu nhập sai link → về HomePage */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

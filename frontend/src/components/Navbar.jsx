@@ -13,23 +13,26 @@ export default function Navbar() {
     }
   });
 
-  // ✅ Lấy user từ token hiện tại (backend /api/auth/me)
+  // ✅ Lấy user nếu có token
   const fetchMe = useCallback(async () => {
     try {
+      const token = localStorage.getItem("access_token");
+      if (!token) return; // Không gọi nếu chưa login
+
       const res = await api.get("/api/auth/me");
       const me = res?.data?.user || res?.data?.data?.user || null;
       if (me) {
         setUser(me);
         localStorage.setItem("user", JSON.stringify(me));
       }
-    } catch {
-      setUser(null);
-      localStorage.removeItem("user");
+    } catch (err) {
+      console.warn("⚠️ Không lấy được user, bỏ qua:", err.message);
+      // ❌ Không xoá user để tránh bị quay về login
     }
   }, []);
 
   useEffect(() => {
-    fetchMe(); // chạy lần đầu
+    fetchMe();
     const onAuthChanged = () => fetchMe();
     window.addEventListener("auth-changed", onAuthChanged);
     window.addEventListener("storage", onAuthChanged);
@@ -39,6 +42,7 @@ export default function Navbar() {
     };
   }, [fetchMe]);
 
+  // ✅ Logout
   const handleLogout = async () => {
     try {
       await api.post("/api/auth/logout").catch(() => {});
@@ -47,13 +51,23 @@ export default function Navbar() {
       localStorage.removeItem("user");
       setUser(null);
       window.dispatchEvent(new Event("auth-changed"));
-      navigate("/login");
+      navigate("/"); // quay về HomePage, không login
+    }
+  };
+
+  // ✅ Search
+  const [keyword, setKeyword] = useState("");
+  const handleSearch = (e) => {
+    e?.preventDefault?.();
+    if (keyword.trim()) {
+      navigate(`/search?q=${encodeURIComponent(keyword.trim())}`);
+      setKeyword("");
     }
   };
 
   return (
     <nav className="sticky top-0 z-50 shadow">
-      {/* Thanh top */}
+      {/* ===== Top bar ===== */}
       <div className="bg-[#ee4d2d] text-white/90 text-[12.5px]">
         <div className="max-w-[1200px] mx-auto px-4 py-2 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -91,28 +105,38 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Header chính */}
+      {/* ===== Header chính ===== */}
       <div className="bg-[#ee4d2d]">
         <div className="max-w-[1200px] mx-auto px-4 py-4 flex items-center gap-6">
+          {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-white">
             <div className="bg-white text-[#ee4d2d] rounded-md w-9 h-9 grid place-items-center font-bold">S</div>
             <span className="text-2xl font-semibold">Shopee Lite</span>
           </Link>
 
-          {/* Search */}
+          {/* Thanh tìm kiếm */}
           <div className="flex-1">
-            <div className="flex items-center bg-white rounded-md overflow-hidden">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center bg-white rounded-md overflow-hidden"
+            >
               <input
+                type="text"
                 className="flex-1 px-3 py-2 outline-none text-sm"
                 placeholder="Tìm sản phẩm…"
+                value={keyword}
+                onChange={(e) => setKeyword(e.target.value)}
               />
-              <button className="bg-[#fb5533] text-white px-4 py-2 text-sm hover:opacity-90">
+              <button
+                type="submit"
+                className="bg-[#fb5533] text-white px-4 py-2 text-sm hover:opacity-90"
+              >
                 Tìm
               </button>
-            </div>
+            </form>
           </div>
 
-          {/* Cart */}
+          {/* Giỏ hàng */}
           <Link
             to="/cart"
             className="text-white text-xl relative hover:opacity-90"

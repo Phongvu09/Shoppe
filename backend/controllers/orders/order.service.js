@@ -12,6 +12,10 @@ export const getAllOrdersService = async () => {
     const orders = await Orders.find();
     return orders;
 };
+export const getMyOrdersService = async (userId) => {
+  const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+  return orders;
+};
 
 export const getOrderByIdService = async (id) => {
     const order = await Order.findById(id);
