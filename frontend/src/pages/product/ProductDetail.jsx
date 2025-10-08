@@ -8,8 +8,8 @@ export default function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [mainImg, setMainImg] = useState("");
   const [isZoom, setIsZoom] = useState(false);
+  const [adding, setAdding] = useState(false);
 
-  // ✅ Danh sách tất cả sản phẩm trong HomePage
   const allProducts = [
     { id: 1, name: "Ốp lưng iPhone", price: 16900, discount: 32, desc: "Ốp lưng dẻo, bảo vệ chống trầy xước cho iPhone.", images: ["https://picsum.photos/400?1", "https://picsum.photos/401?1", "https://picsum.photos/402?1"] },
     { id: 2, name: "Áo thun nam", price: 82770, discount: 30, desc: "Áo thun cotton mềm mịn, thoáng mát, phong cách trẻ trung.", images: ["https://picsum.photos/400?2", "https://picsum.photos/401?2", "https://picsum.photos/402?2"] },
@@ -25,7 +25,6 @@ export default function ProductDetail() {
     { id: 12, name: "Lược chải tóc mát xa da đầu", price: 12900, discount: 36, desc: "Lược massage thư giãn, chăm sóc tóc khỏe đẹp.", images: ["https://picsum.photos/400?12", "https://picsum.photos/401?12", "https://picsum.photos/402?12"] },
   ];
 
-  // ✅ Load sản phẩm theo ID
   useEffect(() => {
     const found = allProducts.find((p) => p.id === Number(id));
     if (found) {
@@ -34,7 +33,34 @@ export default function ProductDetail() {
     }
   }, [id]);
 
-  // ✅ Hàm Mua Ngay
+  // ✅ Thêm vào giỏ hàng
+  const handleAddToCart = async () => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+      alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+      navigate("/login");
+      return;
+    }
+
+    setAdding(true);
+    try {
+      await api.post("/api/cart", {
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        img: product.images[0],
+        quantity: 1,
+      });
+      alert("🛒 Đã thêm vào giỏ hàng!");
+      window.dispatchEvent(new Event("cart-updated"));
+    } catch (err) {
+      console.error("❌ Lỗi thêm giỏ hàng:", err);
+      alert("Lỗi khi thêm vào giỏ hàng!");
+    } finally {
+      setAdding(false);
+    }
+  };
+
   const handleBuyNow = () => {
     const user = JSON.parse(localStorage.getItem("user") || "null");
     if (!user) {
@@ -55,16 +81,8 @@ export default function ProductDetail() {
           className="relative w-full h-[400px] rounded-lg overflow-hidden shadow cursor-pointer group"
           onClick={() => setIsZoom(true)}
         >
-          <img
-            src={mainImg}
-            alt={product.name}
-            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-          />
-          <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-[2px] rounded">
-            Phóng to 🔍
-          </span>
+          <img src={mainImg} alt={product.name} className="w-full h-full object-contain" />
         </div>
-
         <div className="flex gap-2">
           {product.images.map((img, i) => (
             <img
@@ -72,7 +90,6 @@ export default function ProductDetail() {
               src={img}
               alt=""
               onMouseEnter={() => setMainImg(img)}
-              onClick={() => setMainImg(img)}
               className={`w-20 h-20 object-cover rounded-md border-2 cursor-pointer transition-all ${
                 mainImg === img ? "border-[#ee4d2d]" : "border-transparent hover:border-gray-300"
               }`}
@@ -96,18 +113,13 @@ export default function ProductDetail() {
 
         <p className="text-gray-700 leading-relaxed mb-6">{product.desc}</p>
 
-        <div className="flex items-center gap-4 mb-6">
-          <span className="text-gray-700 font-medium">Số lượng:</span>
-          <div className="flex items-center border rounded overflow-hidden">
-            <button className="px-3 py-1 bg-gray-100 hover:bg-gray-200">−</button>
-            <span className="px-4">1</span>
-            <button className="px-3 py-1 bg-gray-100 hover:bg-gray-200">＋</button>
-          </div>
-        </div>
-
         <div className="flex gap-3">
-          <button className="flex-1 border border-[#ee4d2d] text-[#ee4d2d] py-3 rounded hover:bg-[#fff1ec] font-medium transition-all">
-            Thêm vào giỏ hàng
+          <button
+            onClick={handleAddToCart}
+            disabled={adding}
+            className="flex-1 border border-[#ee4d2d] text-[#ee4d2d] py-3 rounded hover:bg-[#fff1ec] font-medium transition-all disabled:opacity-50"
+          >
+            {adding ? "Đang thêm..." : "Thêm vào giỏ hàng"}
           </button>
           <button
             onClick={handleBuyNow}
@@ -117,26 +129,6 @@ export default function ProductDetail() {
           </button>
         </div>
       </div>
-
-      {/* Phóng to ảnh */}
-      {isZoom && (
-        <div
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-[1000]"
-          onClick={() => setIsZoom(false)}
-        >
-          <img
-            src={mainImg}
-            alt={product.name}
-            className="max-h-[90vh] max-w-[90vw] object-contain rounded-lg shadow-lg"
-          />
-          <button
-            className="absolute top-6 right-8 text-white text-3xl font-bold hover:scale-110 transition"
-            onClick={() => setIsZoom(false)}
-          >
-            ✕
-          </button>
-        </div>
-      )}
     </div>
   );
 }

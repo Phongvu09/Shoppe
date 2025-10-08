@@ -42,28 +42,41 @@ export const getOrderById = handleAsync(async (req, res) => {
   return createResponse(res, 200, "Lấy chi tiết đơn hàng thành công", order);
 });
 
+// ✅ Cập nhật địa chỉ giao hàng
+export const updateOrderAddress = handleAsync(async (req, res) => {
+  const { id } = req.params;
+  const { address } = req.body;
+  if (!address || address.trim() === "")
+    return createResponse(res, 400, "Địa chỉ không hợp lệ");
+
+  const order = await orderService.updateOrderService(id, req.user._id, { address });
+  if (!order) return createResponse(res, 404, "Không tìm thấy đơn hàng");
+  return createResponse(res, 200, "Cập nhật địa chỉ thành công ✅", order);
+});
+
 /* ===========================================
    🔹 Các hàm Admin / Seller (Stub)
-   → Giúp router không báo lỗi import
 =========================================== */
 
-// Lấy tất cả đơn hàng (Admin)
 export const getAllOrders = handleAsync(async (req, res) => {
   const orders = await orderService.getAllOrdersService?.();
   return createResponse(res, 200, "Lấy danh sách tất cả đơn hàng (demo)", orders || []);
 });
 
-// Cập nhật đơn hàng (Seller/Admin)
 export const updateOrder = handleAsync(async (req, res) => {
   return createResponse(res, 200, "Cập nhật đơn hàng thành công (demo)");
 });
 
-// Cập nhật trạng thái đơn hàng
 export const updateOrderStatus = handleAsync(async (req, res) => {
   return createResponse(res, 200, "Cập nhật trạng thái đơn hàng (demo)");
 });
 
-// Xoá đơn hàng (Admin)
 export const deleteOrder = handleAsync(async (req, res) => {
-  return createResponse(res, 200, "Xoá đơn hàng thành công (demo)");
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  const order = await orderService.deleteOrderService(id, userId);
+  if (!order) return createResponse(res, 404, "Không tìm thấy đơn hàng để xóa");
+
+  return createResponse(res, 200, "Xóa đơn hàng thành công ✅", order);
 });

@@ -38,7 +38,7 @@ export async function requireAuth(req, res, next) {
       if (!user) return createResponse(res, 401, "Unauthorized: User not found");
     }
 
-    req.user = decoded || user;
+  req.user = user;
     return next();
   } catch (err) {
     console.error("Auth error:", err.message);
