@@ -1,39 +1,22 @@
 import express from "express";
 import {
-    createProduct,
-    updateProduct,
-    getAllProduct,
-    getProduct,
-    deleteProduct,
-    lockProduct,
-    unlockProduct
-} from "../products/products.controller.js";
-// import { uploadToCloudinary, upload } from "../../common/utils/uploadToCloudinary.js";
-
-import { validBodyRequest, validBodyWithFiles } from "../../common/middleware/valid-body.middleware.js";
-import { createProductSchema, updateProductSchema } from "./product.schema.js";
-import upload from "../../common/middleware/upload.middleware.js";
-import { authMiddleware, restrictTo } from "../../common/middleware/auth.js";
-import { USER_ROLE } from "../../common/constant/enum.js";
+  createProduct,
+  updateProduct,
+  getAllProduct,
+  getProduct,
+  deleteProduct,
+} from "./products.controller.js";
+import { upload } from "../../common/configs/cloudinary.config.js";
 
 const router = express.Router();
 
-// ✅ FE cần 2 route này
+// ✅ Route public cho FE
 router.get("/", getAllProduct);
 router.get("/:id", getProduct);
 
-// ✅ Seller thêm sản phẩm
+// ✅ Route cho Seller/Admin
 router.post("/", upload.array("images", 5), createProduct);
-
-// router.use(authMiddleware, restrictTo(USER_ROLE.SELLER))
-
-router.post("/", upload.array("images", 5), validBodyWithFiles(createProductSchema), createProduct);
-// router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.MANAGER))
-router.patch("/:id", upload.array("images", 5), validBodyWithFiles(updateProductSchema), updateProduct);
+router.patch("/:id", upload.array("images", 5), updateProduct);
 router.delete("/:id", deleteProduct);
-
-// router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN)
-router.patch("/:id/lock", lockProduct);
-router.patch("/:id/unlock", unlockProduct);
 
 export default router;

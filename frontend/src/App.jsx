@@ -9,6 +9,8 @@ import ProductPage from "./pages/product/ProductPage.jsx";
 import ProductDetail from "./pages/product/ProductDetail.jsx";
 import SearchResult from "./pages/SearchResult.jsx";
 import Checkout from "./pages/cart/Checkout.jsx"; // ✅ Trang thanh toán
+import CartPage from "@/pages/cart/CartPage.jsx";
+import MyOrders from "@/pages/order/MyOrders.jsx";
 
 // ===== Seller Auth =====
 import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
@@ -67,6 +69,10 @@ export default function App() {
         <Route path="/product/:id" element={<ProductDetail />} />
         <Route path="/search" element={<SearchResult />} />
         <Route path="/checkout" element={<Checkout />} /> {/* ✅ Trang thanh toán */}
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/my-orders" element={<MyOrders />} />
+
+
 
         {/* ✅ Seller */}
         <Route path="/seller/login" element={<LoginSeller />} />

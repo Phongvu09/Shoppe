@@ -13,6 +13,9 @@ import taxRouters from "./controllers/tax/tax.router.js";
 import identityRouters from "./controllers/Identity/identity.router.js";
 import orderRouter from "./controllers/orders/orders.router.js";
 
+// 🛒 Thêm giỏ hàng
+import cartRoute from "./controllers/Cart/cartRoute.js";
+
 const app = express();
 
 // ---------- Middleware cơ bản ----------
@@ -35,6 +38,9 @@ app.use("/api/shop", shopRouters);
 app.use("/api/tax", taxRouters);
 app.use("/api/identity", identityRouters);
 app.use("/api/order", orderRouter);
+
+// ✅ Thêm dòng này để kích hoạt API giỏ hàng
+app.use("/api/cart", cartRoute);
 
 // ---------- Health check ----------
 app.get("/api/health", (req, res) => {
