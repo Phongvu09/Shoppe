@@ -49,14 +49,14 @@ export const checkSellerCompletion = async (userId) => {
   const shop = await Shop.findOne({ userId });
   const shipping = await Shipping.findOne({ shopId: shop?._id });
   const tax = await Tax.findOne({ shopId: shop?._id });
-  const identity = await Identity.findOne({ shopId: shop?._id });
+  // const identity = await Identity.findOne({ shopId: shop?._id });
 
   return {
     shopComplete: !!shop,
     shippingComplete: !!shipping,
     taxComplete: !!tax,
-    identityComplete: !!identity,
-    allComplete: !!shop && !!shipping && !!tax && !!identity
+    // identityComplete: !!identity,
+    allComplete: !!shop && !!shipping && !!tax
   };
 };
 
@@ -443,6 +443,19 @@ export const unlockSeller = async (req, res) => {
     await user.save();
 
     return res.json({ message: "Đã mở khóa quyền SELLER", user: pickSafeUser(user) });
+  } catch (e) {
+    return res.status(500).json({ message: e.message });
+  }
+};
+
+export const checkHaveShopInfomation = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User không tồn tại" });
+
+    const hasShopInfo = user.shopInformation ? true : false;
+    return res.json({ hasShopInfo });
   } catch (e) {
     return res.status(500).json({ message: e.message });
   }

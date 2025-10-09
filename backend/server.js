@@ -1,13 +1,21 @@
+// backend/server.js
 import dotenv from "dotenv";
-import mongoose from "mongoose";
-import app from "./app.js";
-import connectDB from "./common/configs/db.js";
-import "./common/configs/cloudinary.js";
-
 dotenv.config();
 
-connectDB()
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
+import app from "./app.js";
+import connectDB from "./common/configs/db.js";
+
+const PORT = process.env.PORT || 5000;
+
+(async () => {
+  try {
+    await connectDB();                      // log "MongoDB connected" như anh đã có
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (e) {
+    console.error("Failed to start server:", e);
+    process.exit(1);
+  }
+})();
+

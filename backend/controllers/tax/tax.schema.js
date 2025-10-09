@@ -1,47 +1,30 @@
 import { z } from "zod";
-export const createTaxInformationSchema = z.object({
-    shopId: z.string().min(1, "shopId is required"),
-    businessType: z.enum(["Individual", "HouseholdBusiness", "Company"], {
-        errorMap: () => ({ message: "Invalid businessType" }),
 
-    }),
-    // Cá nhân
-    fullName: z.string().min(1, "Full name is required").optional(),
-    personalAddress: z.string().min(1, "Personal address is required").optional(),
-
-    // Hộ kinh doanh / Công ty
-    companyName: z.string().min(1, "Company name is required").optional(),
-    businessRegistrationAddress: z.object({
-        country: z.string().default("Việt Nam").optional(),
-        province: z.string().min(1, "Province is required").optional(),
-        district: z.string().min(1, "District is required").optional(),
-        ward: z.string().min(1, "Ward is required").optional(),
-        commune: z.string().optional()
-    }).optional(),
-    businessLicense: z.string().min(1, "Business license is required").optional(),
-    // Chung
+// Schema riêng cho từng loại hình
+const individualSchema = z.object({
+    businessType: z.literal("Individual"),
+    fullName: z.string().min(1, "Full name is required"),
+    personalAddress: z.string().min(1, "Personal address is required"),
     taxCode: z.string().min(1, "Tax code is required"),
-    emailForReceivingEInvoices: z.string().email("Invalid email address"),
-}).strict()
+    emailForReceivingEInvoices: z.string().email("Invalid email"),
+    shopId: z.string(),
+});
 
-export const updateTaxInformationSchema = z.object({
-    businessType: z.enum(["Individual", "HouseholdBusiness", "Company"], {
-        errorMap: () => ({ message: "Invalid businessType" }),
-    }),
-    // Cá nhân
-    fullName: z.string().min(1, "Full name is required").optional(),
-    personalAddress: z.string().min(1, "Personal address is required").optional(),
-    // Hộ kinh doanh / Công ty
-    companyName: z.string().min(1, "Company name is required").optional(),
+const businessSchema = z.object({
+    businessType: z.enum(["HouseholdBusiness", "Company"]),
+    companyName: z.string().min(1, "Company name is required"),
     businessRegistrationAddress: z.object({
-        country: z.string().default("Việt Nam").optional(),
-        province: z.string().min(1, "Province is required").optional(),
-        district: z.string().min(1, "District is required").optional(),
-        ward: z.string().min(1, "Ward is required").optional(),
-        commune: z.string().optional()
-    }).optional(),
-    businessLicense: z.string().min(1, "Business license is required").optional(),
-    // Chung
-    taxCode: z.string().min(1, "Tax code is required").optional(),
-    emailForReceivingEInvoices: z.string().email("Invalid email address").optional(),
-}).strict()
+        country: z.string().default("Việt Nam"),
+        province: z.string().min(1, "Province is required"),
+        district: z.string().min(1, "District is required"),
+        ward: z.string().min(1, "Ward is required"),
+        commune: z.string().optional(),
+    }),
+    businessLicense: z.string().min(1, "Business license is required"),
+    taxCode: z.string().min(1, "Tax code is required"),
+    emailForReceivingEInvoices: z.string().email("Invalid email"),
+    shopId: z.string(),
+});
+
+// Dùng union để tự động chọn schema phù hợp
+export const taxSchema = z.union([individualSchema, businessSchema]);

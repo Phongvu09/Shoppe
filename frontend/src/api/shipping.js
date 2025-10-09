@@ -1,47 +1,46 @@
-import api from "./api";
+import api from "./api.js";
 
-export async function getAllShippingInformation
-    () {
-    try {
-        const response = await api.get("/shop/");
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || error.message;
-    }
+// GET tất cả shipping
+export async function getAllShippingInformation() {
+    const response = await api.get("/shipping/");
+    return response.data;
 }
 
+// GET theo ID
 export async function getShippingInformationById(id) {
-    try {
-        const response = await api.get(`/shop/${id}`);
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || error.message;
-    }
+    const response = await api.get(`/shipping/${id}`);
+    return response.data;
 }
+
+// CREATE shipping
+
 export async function createShippingInformation(data) {
     try {
-        const response = await api.post("/shop/createShopInformation", data);
+        const token = localStorage.getItem("token");
+        const response = await api.post("/shipping", data, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         return response.data;
-    }
-    catch (error) {
+    } catch (error) {
         throw error.response?.data || error.message;
     }
 }
+
+
+// UPDATE shipping
 export async function updateShippingInformation(id, data) {
-    try {
-        const response = await api.patch(`/shop/${id}`, data);
-        return response.data;
-    }
-    catch (error) {
-        throw error.response?.data || error.message;
-    }
+    const token = localStorage.getItem("accessToken");
+    const response = await api.patch(`/shipping/${id}`, data, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
 }
+
+// DELETE shipping
 export async function deleteShippingInformation(id) {
-    try {
-        const response = await api.delete(`/shop/${id}`);
-        return response.data;
-    }
-    catch (error) {
-        throw error.response?.data || error.message;
-    }
+    const token = localStorage.getItem("accessToken");
+    const response = await api.delete(`/shipping/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return response.data;
 }

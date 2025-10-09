@@ -1,32 +1,52 @@
-import { Routes, Route, Outlet, useParams } from "react-router-dom";
+// src/App.jsx
+import { Routes, Route, Outlet, Navigate } from "react-router-dom";
+
+// ===== User Pages =====
+import HomePage from "./pages/home/HomePage.jsx";
 import Login from "./pages/user/auth/Login.jsx";
 import Register from "./pages/user/auth/Register.jsx";
-import ProductPage from "./pages/product/product.jsx";
+import ProductPage from "./pages/product/ProductPage.jsx";
+import ProductDetail from "./pages/product/ProductDetail.jsx";
+import SearchResult from "./pages/SearchResult.jsx";
+import Checkout from "./pages/cart/Checkout.jsx"; // ✅ Trang thanh toán
+
+// ===== Seller Auth =====
+import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
+import RegisterSeller from "./pages/seller/auth/register/register.auth.jsx";
 import ShopInformation from "./pages/seller/auth/shopInformationForm/shopInformation.jsx";
 import ShippingForm from "./pages/seller/auth/ShippingForm/ShippingForm.jsx";
 import TaxForm from "./pages/seller/auth/TaxForm/TaxForm.jsx";
 import IdentityForm from "./pages/seller/auth/IdentityForm/IdentityForm.jsx";
-import { ProductProvider } from "./pages/seller/productManagement/addingProducts/ProductContext.jsx";
-import { ProductProviderForUpdate } from "./pages/seller/productManagement/updateProduct/ProductContext.jsx";
-import ProductInfo from "./pages/seller/productManagement/addingProducts/ProductInfo.jsx";
-import ProductDetail from "./pages/seller/productManagement/addingProducts/ProductDetail.jsx";
-import ProductSales from "./pages/seller/productManagement/addingProducts/ProductSales.jsx";
-import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
+
+// ===== Seller Layout & Product =====
 import SellerLayout from "./components/SellerLayout.jsx";
-import LoginSeller from "./pages/seller/auth/login/login.auth.jsx";
 import ProductList from "./pages/seller/productManagement/allProducts/ProductList.jsx";
 import ProductDetailPage from "./pages/seller/productManagement/allProducts/ProductDetail.jsx";
+
+import { ProductProvider } from "./pages/seller/productManagement/addingProducts/ProductContext.jsx";
+import { ProductProviderForUpdate } from "./pages/seller/productManagement/updateProduct/ProductContext.jsx";
+
+import ProductInfo from "./pages/seller/productManagement/addingProducts/ProductInfo.jsx";
+import ProductDetailSeller from "./pages/seller/productManagement/addingProducts/ProductDetail.jsx";
+import ProductSales from "./pages/seller/productManagement/addingProducts/ProductSales.jsx";
+import ProductReview from "./pages/seller/productManagement/addingProducts/ProductReview.jsx";
+
 import UpdateProductInfo from "./pages/seller/productManagement/updateProduct/UpdateProductInfo.jsx";
 import UpdateProductDetail from "./pages/seller/productManagement/updateProduct/UpdateProductDetail.jsx";
-import UpdateProductReview from "./pages/seller/productManagement/updateProduct/UpdateProductReview.jsx";
 import UpdateProductSales from "./pages/seller/productManagement/updateProduct/UpdateProductSales.jsx";
+import UpdateProductReview from "./pages/seller/productManagement/updateProduct/UpdateProductReview.jsx";
+
 import PendingOrders from "./pages/seller/orderManagement/allOrders/PendingOrders.jsx";
 import WaitingPickupOrders from "./pages/seller/orderManagement/allOrders/WaitingPickupOrders.jsx";
 import DeliveredOrders from "./pages/seller/orderManagement/allOrders/DeliveredOrders.jsx";
 import SellerOrders from "./pages/seller/orderManagement/allOrderByShop/SellerOrders.jsx";
-// ------------------- Wrappers -------------------
 
-// Wrapper cho adding product
+// ===== Common Components =====
+import Navbar from "./components/Navbar.jsx";
+
+// ============================
+//   PRODUCT WRAPPERS (Context)
+// ============================
 function ProductRoutesWrapper() {
   return (
     <ProductProvider>
@@ -37,7 +57,6 @@ function ProductRoutesWrapper() {
   );
 }
 
-// Wrapper cho update product
 function ProductRoutesWrapperForUpdate() {
   return (
     <ProductProviderForUpdate>
@@ -48,26 +67,42 @@ function ProductRoutesWrapperForUpdate() {
   );
 }
 
+// ============================
+//         MAIN LAYOUT
+// ============================
+function AppLayout() {
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
+}
 
-// ------------------- App Component -------------------
-function App() {
+// ============================
+//           APP
+// ============================
+export default function App() {
   return (
     <Routes>
-      {/* Auth */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/seller/login" element={<LoginSeller />} />
+      {/* ========= Layout chính có Navbar ========= */}
+      <Route element={<AppLayout />}>
+        {/* ✅ Trang người dùng */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/product" element={<ProductPage />} />
+        <Route path="/product/:id" element={<ProductDetail />} />
+        <Route path="/search" element={<SearchResult />} />
+        <Route path="/checkout" element={<Checkout />} /> {/* ✅ Trang thanh toán */}
+      </Route>
 
-      {/* User Product Page */}
-      <Route path="/product" element={<ProductPage />} />
-
-      {/* Seller Registration Forms */}
+      {/* ========= Seller Layout có Navbar riêng ========= */}
+      {/* ✅ Seller Auth Forms */}
       <Route path="/shop-info" element={<ShopInformation />} />
       <Route path="/seller/shipping-form" element={<ShippingForm />} />
       <Route path="/seller/tax-form" element={<TaxForm />} />
       <Route path="/seller/identity-form" element={<IdentityForm />} />
 
-      {/* Seller Product List */}
+      {/* ✅ Seller Product List */}
       <Route
         path="/seller/products/list"
         element={
@@ -85,8 +120,7 @@ function App() {
         }
       />
 
-      {/* Order Status */}
-
+      {/* ✅ Order Pages */}
       <Route
         path="/seller/orders/pending"
         element={
@@ -123,7 +157,7 @@ function App() {
       {/* ----------------- Adding Product ----------------- */}
       <Route element={<ProductRoutesWrapper />}>
         <Route path="/seller/product/info" element={<ProductInfo />} />
-        <Route path="/seller/product/detail" element={<ProductDetail />} />
+        <Route path="/seller/product/detail" element={<ProductDetailSeller />} />
         <Route path="/seller/product/sales" element={<ProductSales />} />
         <Route path="/seller/product/review" element={<ProductReview />} />
       </Route>
@@ -135,8 +169,15 @@ function App() {
         <Route path="/seller/product/update/sales/:id" element={<UpdateProductSales />} />
         <Route path="/seller/product/update/review/:id" element={<UpdateProductReview />} />
       </Route>
+
+      {/* ========= Auth pages nằm ngoài Layout ========= */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/seller/login" element={<LoginSeller />} />
+      <Route path="/seller/register" element={<RegisterSeller />} />
+
+      {/* ✅ Nếu nhập sai link → về HomePage */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
-
-export default App;

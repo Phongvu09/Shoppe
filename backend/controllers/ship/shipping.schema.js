@@ -9,7 +9,7 @@ export const createShippingSchema = z.object({
             codEnabled: z.boolean().optional(),
             weightLimit: z.number().optional()
         })
-    )
+    ).min(1, "Phải có ít nhất 1 phương thức vận chuyển")
 }).strict();
 
 export const updateShippingSchema = z.object({

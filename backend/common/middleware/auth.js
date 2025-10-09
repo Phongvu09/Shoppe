@@ -1,59 +1,76 @@
-// backend/common/middleware/auth.js
+// ✅ Middleware xác thực & phân quyền (ESM)
+import jwt from "jsonwebtoken";
+import Users from "../../models/Users.js";
 import { verifyAccessToken } from "../utils/jwt.js";
 import { createResponse } from "../configs/respone.config.js";
 import { normalizeRoles } from "../utils/normalizeRoles.js";
-/** Lấy token từ header */
-const extractToken = (req) => {
-  const auth = req.headers.authorization || "";
-  if (auth.startsWith("Bearer ")) return auth.slice(7);
-  // fallback: hỗ trợ header khác nếu cần
-  return req.headers["x-access-token"] || null;
-};
 
-/** Yêu cầu có token hợp lệ (Authorization: Bearer <token>) */
-export const authMiddleware = (req, res, next) => {
-  const token = extractToken(req);
-  if (!token) return createResponse(res, 401, "Unauthorized: No token provided");
+const JWT_SECRET = process.env.JWT_SECRET || "dev-secret";
 
+/** Lấy token từ header Authorization: Bearer <token> */
+function getTokenFromHeader(req) {
+  const { authorization } = req.headers || {};
+  if (!authorization) return null;
+  const [scheme, token] = authorization.split(" ");
+  if (scheme?.toLowerCase() !== "bearer" || !token) return null;
+  return token.trim();
+}
+
+/** Middleware xác thực người dùng */
+export async function requireAuth(req, res, next) {
   try {
-    const decoded = verifyAccessToken(token);
-    if (!decoded || !decoded.role) {
-      return createResponse(res, 401, "Unauthorized: Token invalid or missing role");
+    const token = getTokenFromHeader(req);
+    if (!token) return createResponse(res, 401, "Unauthorized: Missing token");
+
+    // Ưu tiên verify bằng utils nếu có
+    let decoded;
+    try {
+      decoded = verifyAccessToken ? verifyAccessToken(token) : jwt.verify(token, JWT_SECRET);
+    } catch {
+      decoded = jwt.verify(token, JWT_SECRET);
     }
-    req.user = decoded;
-    return next();
-  } catch (e) {
+
+    if (!decoded?.id) {
+      return createResponse(res, 401, "Unauthorized: Invalid token payload");
+    }
+
+    const user = await Users.findById(decoded.id).select("-password");
+    if (!user) return createResponse(res, 401, "Unauthorized: User not found");
+
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error("Auth error:", err.message);
     return createResponse(res, 401, "Unauthorized: Invalid token");
   }
-};
+}
 
-
-/** Chỉ cho phép các role truyền vào */
-// restrictTo.js
-export const restrictTo = (...roles) => {
+/** Middleware phân quyền theo role */
+export const restrictTo = (...allowedRoles) => {
   return (req, res, next) => {
     try {
-      const userRoles = normalizeRoles(req.user?.role); // ["user","seller"]
-
-      if (!userRoles.length) {
-        console.error("❌ Lỗi: Không tìm thấy role trong token", req.user);
-        return createResponse(res, 401, "Unauthorized: Missing user or role in token");
+      if (!req.user) {
+        return createResponse(res, 401, "Unauthorized: Missing user in token");
       }
 
-      const allowedRoles = roles.map((r) =>
-        typeof r === "string" ? r.toLowerCase() : String(r).toLowerCase()
-      );
+      // Chuẩn hóa role (ví dụ: ['USER', 'SELLER'])
+      const userRoles = normalizeRoles
+        ? normalizeRoles(req.user.role)
+        : [req.user.role?.toUpperCase()];
+
+      // Kiểm tra role có nằm trong danh sách cho phép không
+      const allowed = allowedRoles
+        .map((r) => r.toLowerCase())
+        .some((r) => userRoles.includes(r));
 
       console.log("🔍 Check roles:", { userRoles, allowedRoles });
-
-      const allowed = allowedRoles.some((r) => userRoles.includes(r));
 
       if (!allowed) {
         console.error("❌ Lỗi phân quyền:", {
           tokenUser: req.user,
           userRoles,
           allowedRoles,
-          message: `Role ${userRoles.join(", ")} không được phép`
+          message: `Role ${userRoles.join(", ")} không được phép`,
         });
         return createResponse(
           res,
@@ -70,7 +87,5 @@ export const restrictTo = (...roles) => {
   };
 };
 
-
-
-export const requireAuth = authMiddleware;
-export const requireRole = restrictTo;
+// Alias để tương thích với code cũ
+export const authMiddleware = requireAuth;

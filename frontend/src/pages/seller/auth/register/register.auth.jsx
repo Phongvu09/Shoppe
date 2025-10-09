@@ -27,7 +27,7 @@ export default function registerSeller() {
             console.log("Register success:", res.data);
 
             // có thể redirect sang login page
-            window.location.href = "/login";
+            window.location.href = "/seller/login";
         } catch (err) {
             console.log(err);
             setError(err.response?.data?.message || "Đăng ký thất bại");
@@ -80,9 +80,10 @@ export default function registerSeller() {
                 </button>
 
                 <p>
-                    Đã có tài khoản? <a href="/login">Đăng nhập</a>
+                    Đã có tài khoản? <a href="/seller/login">Đăng nhập</a>
                 </p>
             </form>
         </div>
     );
 }
+

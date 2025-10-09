@@ -1,45 +1,55 @@
 import { createResponse } from "../../common/configs/respone.config.js";
 import { handleAsync } from "../../common/utils/handle-asynce.config.js";
-import MESSAGES from "./auth.message.js";
-import {
-    authLoginService,
-    autRegisterService,
-    checkHaveSellerRoleService,
-    loginSellerService
-} from "./auth.service.js";
+import { registerService, loginService } from "./auth.service.js";
+import Users from "../../models/Users.js";
 
-// Đăng ký
-export const authRegister = handleAsync(async (req, res) => {
-    const newUser = await autRegisterService(req.body);
-    if (!newUser) {
-        return createResponse(res, 400, MESSAGES.REGISTER_FAILURE);
-    }
-    return createResponse(res, 200, MESSAGES.REGISTER_SUCCESS, newUser);
+export const registerUser = handleAsync(async (req, res) => {
+  const { username, email, password } = req.body;
+  const newUser = await registerService({ username, email, password });
+  if (!newUser) return createResponse(res, 400, "Email đã tồn tại");
+  return createResponse(res, 201, "Đăng ký user thành công", { user: newUser });
 });
 
-// Đăng nhập thường
-export const authLogin = handleAsync(async (req, res) => {
-    const { user, accessToken } = await authLoginService(req.body);
-
-    if (!user || !accessToken) {
-        return createResponse(res, 400, MESSAGES.LOGIN_FAILURE);
-    }
-    return createResponse(res, 200, MESSAGES.LOGIN_SUCCESS, { user, accessToken });
+export const registerSeller = handleAsync(async (req, res) => {
+  const { username, email, password } = req.body;
+  const newSeller = await registerService({
+    username,
+    email,
+    password,
+    role: ["seller"],
+  });
+  if (!newSeller) return createResponse(res, 400, "Email đã tồn tại");
+  return createResponse(res, 201, "Đăng ký seller thành công", { user: newSeller });
 });
 
-// Check role Seller
-export const checkHaveSellerRole = handleAsync(async (req, res) => {
-    const { email } = req.body;
-    const isSeller = await checkHaveSellerRoleService(email);
-    return createResponse(res, 200, MESSAGES.CHECK_ROLE_SUCCESS, { isSeller });
+export const login = handleAsync(async (req, res) => {
+  const { user, accessToken } = await loginService(req.body);
+  if (!user || !accessToken) {
+    console.log("Login failed:", req.body.email);
+    return createResponse(res, 401, "Email hoặc mật khẩu không đúng");
+  }
+
+  return createResponse(res, 200, "Đăng nhập thành công", {
+    user: {
+      id: user._id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    },
+    accessToken,
+  });
 });
 
-// Đăng nhập Seller
-export const loginSeller = handleAsync(async (req, res) => {
-    const { user, accessToken } = await loginSellerService(req.body);
+export const getMe = handleAsync(async (req, res) => {
+  const id = req.user?._id || req.user?.id;
+  if (!id) return createResponse(res, 401, "Unauthorized");
 
-    if (!user || !accessToken) {
-        return createResponse(res, 400, MESSAGES.LOGIN_FAILURE);
-    }
-    return createResponse(res, 200, MESSAGES.LOGIN_SUCCESS, { user, accessToken });
+  const me = await Users.findById(id).select("-password");
+  if (!me) return createResponse(res, 404, "User not found");
+
+  return createResponse(res, 200, "OK", { user: me });
+});
+
+export const logout = handleAsync(async (_req, res) => {
+  return createResponse(res, 200, "Đăng xuất thành công");
 });

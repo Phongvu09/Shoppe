@@ -1,47 +1,47 @@
-import { createResponse } from "../../common/configs/respone.config.js"
-import { handleAsync } from "../../common/utils/handle-asynce.config.js"
-import * as ShippingService from "./shipping.service.js"
-import MESSAGES from "./shipping.message.js"
+import { createResponse } from "../../common/configs/respone.config.js";
+import { handleAsync } from "../../common/utils/handle-asynce.config.js";
+import * as ShippingService from "./shipping.service.js";
+import MESSAGES from "./shipping.message.js";
 
 export const getAllShippingInformation = handleAsync(async (req, res) => {
-    const shippings = await ShippingService.getAllShippingInformation()
+    const shippings = await ShippingService.getAllShippingInformation();
     if (!shippings || shippings.length === 0) {
-        createResponse(res, 400, MESSAGES.GET_FAILURE)
+        return createResponse(res, 400, MESSAGES.GET_FAILURE);
     }
-    createResponse(res, 200, MESSAGES.GET_SUCCESS, shippings)
-})
+    return createResponse(res, 200, MESSAGES.GET_SUCCESS, shippings);
+});
 
 export const getShippingInformationById = handleAsync(async (req, res) => {
-    const shipping = await ShippingService.getShippingInformationById(req.params.id)
+    const shipping = await ShippingService.getShippingInformationById(req.params.id);
+    if (!shipping) return createResponse(res, 400, MESSAGES.NOT_FOUND);
+    return createResponse(res, 200, MESSAGES.GET_SUCCESS, shipping);
+});
 
-    if (!shipping) {
-        createResponse(res, 400, MESSAGES.NOT_FOUND)
-    }
-    createResponse(res, 200, MESSAGES.GET_SUCCESS, shipping)
-})
-
+// Tạo shipping, chỉ tạo mới nếu chưa có shopId
 export const createShippingInformation = handleAsync(async (req, res) => {
-    const shipping = await ShippingService.createShippingInformation(req.body)
-
-    if (!shipping) {
-        createResponse(res, 400, MESSAGES.CREATE_FAILURE)
+    const shopId = req.body.id;
+    const existing = await ShippingService.getShippingByShopId(shopId);
+    if (existing) {
+        return createResponse(res, 200, "Shipping configuration already exists", existing);
     }
-    createResponse(res, 200, MESSAGES.CREATE_SUCCESS, shipping)
-})
+    const shipping = await ShippingService.createShippingInformation(req.body);
+    return createResponse(res, 200, MESSAGES.CREATE_SUCCESS, shipping);
+});
 
 export const updateShippingInformation = handleAsync(async (req, res) => {
-    const shipping = await ShippingService.updateShippingInformation(req.params.id, req.body)
-    if (!shipping) {
-        createResponse(res, 400, MESSAGES.UPDATE_FAILURE)
-    }
-    createResponse(res, 200, MESSAGES.UPDATE_SUCCESS, shipping)
-})
+    const shipping = await ShippingService.updateShippingInformation(req.params.id, req.body);
+    if (!shipping) return createResponse(res, 400, MESSAGES.UPDATE_FAILURE);
+    return createResponse(res, 200, MESSAGES.UPDATE_SUCCESS, shipping);
+});
 
 export const deleteShippingInformation = handleAsync(async (req, res) => {
-    const shipping = await ShippingService.deleteShippingInformation(req.params.id)
+    const shipping = await ShippingService.deleteShippingInformation(req.params.id);
+    if (!shipping) return createResponse(res, 400, MESSAGES.DELETE_FAILURE);
+    return createResponse(res, 200, MESSAGES.DELETE_SUCCESS, shipping);
+});
 
-    if (!shipping) {
-        createResponse(res, 400, MESSAGES.DELETE_FAILURE)
-    }
-    createResponse(res, 200, MESSAGES.DELETE_SUCCESS, shipping)
+export const deleteAllShipping = handleAsync(async (req, res) => {
+    await ShippingService.deleteAllShipping();
+    return createResponse(res, 200, "All shipping configurations have been deleted");
 })
+

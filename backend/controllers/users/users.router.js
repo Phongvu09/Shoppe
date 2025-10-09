@@ -14,9 +14,10 @@ import {
   loginSeller,
   lockSeller,
   unlockSeller,
+  checkSellerCompletion
 } from "../users/users.controller.js";
 
-import { authMiddleware as requireAuth, restrictTo as requireRole } from "../../common/middleware/auth.js";
+import { requireAuth, restrictTo as requireRole } from "../../common/middleware/auth.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
 
 import { validate } from "../../common/middleware/validate.js";
@@ -39,6 +40,7 @@ router.post("/refresh-token", validate(refreshSchema), refreshToken);  // ✅ 1 
 router.get("/me", requireAuth, me);
 router.post("/forgot-password", validate(forgotSchema), forgotPassword);
 router.post("/reset-password", validate(resetSchema), resetPassword);
+router.post("/check-seller-completion", checkSellerCompletion);
 
 /* ---------- CRUD ---------- */
 // router.get("/", requireAuth, requireRole(USER_ROLE.ADMIN), getAllUser);
@@ -49,8 +51,10 @@ router.patch("/:id", requireAuth, validate(updateUserSchema), updateUser);
 router.delete("/:id", requireAuth, requireRole(USER_ROLE.ADMIN), deleteUser);
 router.delete("/", requireAuth, requireRole(USER_ROLE.ADMIN), deleteAllUser);
 
+
 /* ---------- Seller Lock / Unlock ---------- */
 router.patch("/:id/lock-seller", requireAuth, requireRole(USER_ROLE.ADMIN), lockSeller);
 router.patch("/:id/unlock-seller", requireAuth, requireRole(USER_ROLE.ADMIN), unlockSeller);
 
-export default router;
+const userRouter = router;
+export default userRouter;

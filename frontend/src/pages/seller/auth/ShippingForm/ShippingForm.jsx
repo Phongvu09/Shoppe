@@ -10,113 +10,113 @@ const SHIPPING_GROUPS = [
     { key: "bulky", title: "Hàng Cồng Kềnh", methods: ["Hàng Cồng Kềnh"] }
 ];
 
-const shopId = localStorage.getItem("shopId");
 export default function ShippingForm() {
     const navigate = useNavigate();
+    const shopId = localStorage.getItem("shopId");
 
     const [groups, setGroups] = useState(
         SHIPPING_GROUPS.map((g) => ({
             ...g,
             isOpen: true,
-            methodsState: g.methods.map((m) => ({
-                name: m,
-                isActive: true,
-                codEnabled: true
-            }))
+            methodsState: g.methods.map((m) => ({ name: m, isActive: true, codEnabled: true }))
         }))
     );
 
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
 
-    const toggleMethod = (groupIdx, methodIdx, field) => {
-        const updated = [...groups];
-        updated[groupIdx].methodsState[methodIdx][field] =
-            !updated[groupIdx].methodsState[methodIdx][field];
-        setGroups(updated);
+    const toggleMethod = (gIdx, mIdx, field) => {
+        setGroups((prev) => {
+            const updated = [...prev];
+            const method = updated[gIdx].methodsState[mIdx];
+            method[field] = !method[field];
+            if (field === "isActive" && !method.isActive) method.codEnabled = false;
+            return updated;
+        });
     };
 
     const toggleAccordion = (idx) => {
-        const updated = [...groups];
-        updated[idx].isOpen = !updated[idx].isOpen;
-        setGroups(updated);
+        setGroups((prev) => {
+            const updated = [...prev];
+            updated[idx].isOpen = !updated[idx].isOpen;
+            return updated;
+        });
     };
 
     const validateForm = () => {
         const newErrors = {};
-        let hasActiveMethod = groups.some((g) =>
-            g.methodsState.some((m) => m.isActive)
-        );
-        if (!hasActiveMethod) {
-            newErrors.methods = "Vui lòng bật ít nhất một phương thức vận chuyển";
-        }
+        const hasActive = groups.some((g) => g.methodsState.some((m) => m.isActive));
+        if (!hasActive) newErrors.methods = "Vui lòng bật ít nhất một phương thức vận chuyển";
         return newErrors;
     };
 
-    const handleSubmit = (e, action = "next") => {
-        e.preventDefault();
-
+    const handleSave = async () => {
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
             return;
         }
 
-        const payload = groups.map((group) => ({
-            shopId: shopId,
-            group: group.key,
-            methods: group.methodsState.map((m) => ({
-                name: m.name,
-                isActive: m.isActive,
-                codEnabled: m.codEnabled
-            }))
-        }));
+        if (!shopId) {
+            alert("Chưa có shopId, vui lòng tạo shop trước.");
+            return;
+        }
 
-        createShippingInformation(payload)
-            .then((response) => {
-                console.log("Shipping information saved:", response.data);
-                if (action === "next") {
-                    navigate("/tax-form");
-                } else if (action === "save") {
-                    console.log("Thông tin đã được lưu tạm thời.");
-                }
-            })
-            .catch((error) => {
-                console.error("Error saving shipping information:", error);
-            });
+        const payload = {
+            shopId,
+            methods: groups.flatMap((g) =>
+                g.methodsState.map((m) => ({
+                    name: g.key,
+                    isActive: m.isActive,
+                    codEnabled: m.isActive ? m.codEnabled : false
+                }))
+            )
+        };
+
+        try {
+            setLoading(true);
+            const response = await createShippingInformation(payload);
+            console.log("✅ Shipping information saved:", response);
+
+            if (response?.shipping?._id) {
+                localStorage.setItem("shippingId", response.shipping._id);
+            }
+
+            alert("Lưu thành công!");
+        } catch (error) {
+            console.error("❌ Error saving shipping information:", error);
+            alert(error.message || "Không thể lưu thông tin vận chuyển");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleNext = () => {
+        navigate("/seller/tax-form");
     };
 
     return (
-        <form className="shipping-form">
+        <form className="shipping-form" onSubmit={(e) => e.preventDefault()}>
             <h2>Cấu hình Vận chuyển</h2>
 
             {groups.map((group, gIdx) => (
                 <div className="accordion" key={group.key}>
-                    <div
-                        className="accordion-header"
-                        onClick={() => toggleAccordion(gIdx)}
-                    >
-                        {group.title}
-                        <span>{group.isOpen ? "▾" : "▸"}</span>
+                    <div className="accordion-header" onClick={() => toggleAccordion(gIdx)}>
+                        {group.title} <span>{group.isOpen ? "▾" : "▸"}</span>
                     </div>
+
                     {group.isOpen && (
                         <div className="accordion-body">
                             {group.methodsState.map((method, mIdx) => (
                                 <label className="method-row" key={method.name}>
-                                    <span className="method-label">{method.name}</span>
-                                    <label className="switch-label switch">
-                                        <input
-                                            type="checkbox"
-                                            checked={method.isActive}
-                                            onChange={() =>
-                                                toggleMethod(gIdx, mIdx, "isActive")
-                                            }
-                                        />
-                                        <span className="slider"></span>
-                                    </label>
+                                    <span>{method.name}</span>
+                                    <input
+                                        type="checkbox"
+                                        checked={method.isActive}
+                                        onChange={() => toggleMethod(gIdx, mIdx, "isActive")}
+                                    />
                                     {method.isActive && (
-                                        <span className="cod-label">
-                                            [COD đã được kích hoạt]
-                                        </span>
+                                        <span className="cod-status">[COD đã được kích hoạt]</span>
                                     )}
                                 </label>
                             ))}
@@ -125,38 +125,18 @@ export default function ShippingForm() {
                 </div>
             ))}
 
-            {errors.methods && (
-                <p className="error-text">{errors.methods}</p>
-            )}
+            {errors.methods && <p className="error-text">{errors.methods}</p>}
 
-            {/* Buttons */}
             <div className="form-actions">
-                {/* Quay lại */}
-                <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => navigate("/shop-info")}
-                >
+                <button type="button" onClick={() => navigate("/shop-info")} disabled={loading}>
                     Quay lại
                 </button>
-
-                {/* Lưu + Tiếp theo */}
-                <div className="right-buttons">
-                    <button
-                        type="button"
-                        className="btn-save"
-                        onClick={(e) => handleSubmit(e, "save")}
-                    >
-                        Lưu
-                    </button>
-                    <button
-                        type="submit"
-                        className="btn-next"
-                        onClick={(e) => handleSubmit(e, "next")}
-                    >
-                        Tiếp theo
-                    </button>
-                </div>
+                <button type="button" onClick={handleSave} disabled={loading}>
+                    {loading ? "Đang lưu..." : "Lưu"}
+                </button>
+                <button type="button" onClick={handleNext}>
+                    Tiếp theo
+                </button>
             </div>
         </form>
     );

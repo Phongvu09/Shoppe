@@ -1,11 +1,11 @@
 import { useState } from "react";
 import "./TaxForm.css";
-import { createTax } from "../../../../api/tax.js";
+import { createTaxInformation } from "../../../../api/tax.js";
 import { useNavigate } from "react-router-dom";
 
-const shopId = localStorage.getItem("shopId");
 export default function TaxForm() {
     const navigate = useNavigate();
+    const shopId = localStorage.getItem("shopId");
 
     const [form, setForm] = useState({
         businessType: "Individual",
@@ -19,9 +19,9 @@ export default function TaxForm() {
             ward: "",
             commune: ""
         },
-        businessLicense: null,
+        businessLicense: "",
         taxCode: "",
-        email: ""
+        emailForReceivingEInvoices: ""
     });
 
     const [errors, setErrors] = useState({});
@@ -42,30 +42,24 @@ export default function TaxForm() {
         setErrors({ ...errors, [field]: "" });
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        setForm({ ...form, businessLicense: file });
-        setErrors({ ...errors, businessLicense: "" });
-    };
-
     const validateForm = () => {
         const newErrors = {};
         if (form.businessType === "Individual") {
             if (!form.fullName) newErrors.fullName = "Vui lòng nhập họ và tên";
-            if (!form.personalAddress) newErrors.personalAddress = "Vui lòng nhập địa chỉ";
+            if (!form.personalAddress) newErrors.personalAddress = "Vui lòng nhập địa chỉ cá nhân";
         } else {
             if (!form.companyName) newErrors.companyName = "Vui lòng nhập tên công ty / hộ kinh doanh";
             if (!form.businessRegistrationAddress.province) newErrors.province = "Vui lòng nhập tỉnh/thành phố";
             if (!form.businessRegistrationAddress.district) newErrors.district = "Vui lòng nhập quận/huyện";
             if (!form.businessRegistrationAddress.ward) newErrors.ward = "Vui lòng nhập phường/xã";
-            if (!form.businessLicense) newErrors.businessLicense = "Vui lòng upload giấy phép kinh doanh";
+            if (!form.businessLicense) newErrors.businessLicense = "Vui lòng nhập số giấy phép kinh doanh";
         }
         if (!form.taxCode) newErrors.taxCode = "Vui lòng nhập mã số thuế";
-        if (!form.email) newErrors.email = "Vui lòng nhập email";
+        if (!form.emailForReceivingEInvoices) newErrors.emailForReceivingEInvoices = "Vui lòng nhập email";
         return newErrors;
     };
 
-    const handleSubmit = (e, action = "next") => {
+    const handleSave = async (e) => {
         e.preventDefault();
 
         const validationErrors = validateForm();
@@ -74,44 +68,26 @@ export default function TaxForm() {
             return;
         }
 
-        // Tạo payload
-        const payload = {
-            shopId: shopId,
-            businessType: form.businessType,
-            taxCode: form.taxCode,
-            email: form.email
-
+        try {
+            const payload = { ...form, shopId };
+            const response = await createTaxInformation(payload);
+            console.log("✅ Tax information saved:", response);
+            alert("Lưu thông tin thuế thành công!");
+        } catch (error) {
+            console.error("❌ Error saving tax information:", error);
+            alert(error.message || "Không thể lưu thông tin thuế!");
         }
-        Object.keys(form).forEach((key) => {
-            if (key === "businessRegistrationAddress") {
-                payload[key] = JSON.stringify(form[key]);
-            } else {
-                payload[key] = form[key];
-            }
-        });
+    };
 
-        createTax(payload)
-            .then((response) => {
-                console.log("Tax information saved:", response.data);
-                if (action === "next") {
-                    navigate("/identity-form");
-                } else if (action === "save") {
-
-                    console.log("Thông tin đã được lưu tạm thời.");
-                } else {
-                    console.log("Unknown action:", action);
-                }
-            })
-            .catch((error) => {
-                console.error("Error saving tax information:", error);
-            });
+    const handleNext = (e) => {
+        e.preventDefault();
+        navigate("/seller/identity-form");
     };
 
     return (
         <form className="tax-form">
             <h2>Thông tin Thuế</h2>
 
-            {/* Loại hình kinh doanh */}
             <label>
                 Loại hình kinh doanh:
                 <select
@@ -124,7 +100,6 @@ export default function TaxForm() {
                 </select>
             </label>
 
-            {/* Cá nhân */}
             {form.businessType === "Individual" && (
                 <>
                     <label>
@@ -134,48 +109,45 @@ export default function TaxForm() {
                             value={form.fullName}
                             onChange={(e) => handleChange("fullName", e.target.value)}
                             className={errors.fullName ? "error" : ""}
-                            placeholder={errors.fullName || "Nguyễn Văn A"}
+                            placeholder="Nguyễn Văn A"
                         />
                         {errors.fullName && <span className="error-text">{errors.fullName}</span>}
                     </label>
 
                     <label>
-                        Địa chỉ:
+                        Địa chỉ cá nhân:
                         <input
                             type="text"
                             value={form.personalAddress}
                             onChange={(e) => handleChange("personalAddress", e.target.value)}
                             className={errors.personalAddress ? "error" : ""}
-                            placeholder={errors.personalAddress || "123 Trường Chinh, Hà Nội"}
+                            placeholder="123 Trường Chinh, Hà Nội"
                         />
                         {errors.personalAddress && <span className="error-text">{errors.personalAddress}</span>}
                     </label>
                 </>
             )}
 
-            {/* Hộ kinh doanh & Công ty */}
             {(form.businessType === "HouseholdBusiness" || form.businessType === "Company") && (
                 <>
                     <label>
-                        Tên công ty / Hộ kinh doanh:
+                        Tên công ty / hộ kinh doanh:
                         <input
                             type="text"
                             value={form.companyName}
                             onChange={(e) => handleChange("companyName", e.target.value)}
                             className={errors.companyName ? "error" : ""}
-                            placeholder={errors.companyName || "Công ty TNHH ABC"}
+                            placeholder="Công ty TNHH ABC"
                         />
                         {errors.companyName && <span className="error-text">{errors.companyName}</span>}
                     </label>
 
                     <fieldset className="address-section">
                         <legend>Địa chỉ đăng ký kinh doanh</legend>
-
                         <label>
                             Quốc gia:
                             <input type="text" value="Việt Nam" disabled />
                         </label>
-
                         <label>
                             Tỉnh/Thành phố:
                             <input
@@ -183,11 +155,10 @@ export default function TaxForm() {
                                 value={form.businessRegistrationAddress.province}
                                 onChange={(e) => handleAddressChange("province", e.target.value)}
                                 className={errors.province ? "error" : ""}
-                                placeholder={errors.province || "TP. Hồ Chí Minh"}
+                                placeholder="TP. Hồ Chí Minh"
                             />
                             {errors.province && <span className="error-text">{errors.province}</span>}
                         </label>
-
                         <label>
                             Quận/Huyện:
                             <input
@@ -195,11 +166,10 @@ export default function TaxForm() {
                                 value={form.businessRegistrationAddress.district}
                                 onChange={(e) => handleAddressChange("district", e.target.value)}
                                 className={errors.district ? "error" : ""}
-                                placeholder={errors.district || "Quận 1"}
+                                placeholder="Quận 1"
                             />
                             {errors.district && <span className="error-text">{errors.district}</span>}
                         </label>
-
                         <label>
                             Phường/Xã:
                             <input
@@ -207,11 +177,10 @@ export default function TaxForm() {
                                 value={form.businessRegistrationAddress.ward}
                                 onChange={(e) => handleAddressChange("ward", e.target.value)}
                                 className={errors.ward ? "error" : ""}
-                                placeholder={errors.ward || "Phường Bến Nghé"}
+                                placeholder="Phường Bến Nghé"
                             />
                             {errors.ward && <span className="error-text">{errors.ward}</span>}
                         </label>
-
                         <label>
                             Thôn/Ấp (nếu có):
                             <input
@@ -224,21 +193,19 @@ export default function TaxForm() {
                     </fieldset>
 
                     <label>
-                        Giấy phép kinh doanh:
+                        Số giấy phép kinh doanh:
                         <input
-                            type="file"
-                            accept="image/*,.pdf"
-                            onChange={handleFileChange}
+                            type="text"
+                            value={form.businessLicense}
+                            onChange={(e) => handleChange("businessLicense", e.target.value)}
                             className={errors.businessLicense ? "error" : ""}
+                            placeholder="0123456789"
                         />
-                        {errors.businessLicense && (
-                            <span className="error-text">{errors.businessLicense}</span>
-                        )}
+                        {errors.businessLicense && <span className="error-text">{errors.businessLicense}</span>}
                     </label>
                 </>
             )}
 
-            {/* Chung */}
             <label>
                 Mã số thuế:
                 <input
@@ -246,7 +213,7 @@ export default function TaxForm() {
                     value={form.taxCode}
                     onChange={(e) => handleChange("taxCode", e.target.value)}
                     className={errors.taxCode ? "error" : ""}
-                    placeholder={errors.taxCode || "Nhập mã số thuế"}
+                    placeholder="Nhập mã số thuế"
                 />
                 {errors.taxCode && <span className="error-text">{errors.taxCode}</span>}
             </label>
@@ -255,41 +222,29 @@ export default function TaxForm() {
                 Email nhận hóa đơn điện tử:
                 <input
                     type="email"
-                    value={form.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                    className={errors.email ? "error" : ""}
-                    placeholder={errors.email || "example@email.com"}
+                    value={form.emailForReceivingEInvoices}
+                    onChange={(e) => handleChange("emailForReceivingEInvoices", e.target.value)}
+                    className={errors.emailForReceivingEInvoices ? "error" : ""}
+                    placeholder="example@email.com"
                 />
-                {errors.email && <span className="error-text">{errors.email}</span>}
+                {errors.emailForReceivingEInvoices && (
+                    <span className="error-text">{errors.emailForReceivingEInvoices}</span>
+                )}
             </label>
 
-            {/* Nút hành động */}
             <div className="form-actions">
-                {/* Quay lại nằm bên trái */}
-                <button
-                    type="button"
-                    className="btn-secondary"
-                    onClick={() => navigate("/shipping-form")}
-                >
+                <button type="button" onClick={() => navigate("/shipping-form")} className="btn-secondary">
                     Quay lại
                 </button>
-
-
-                {/* Gom Lưu + Tiếp theo về bên phải */}
                 <div className="right-buttons">
-                    <button
-                        type="button"
-                        className="btn-save"
-                        onClick={(e) => handleSubmit(e, "save")}
-                    >
+                    <button type="button" onClick={handleSave} className="btn-save">
                         Lưu
                     </button>
-                    <button type="submit" className="btn-next" onClick={(e) => handleSubmit(e, "next")}>
+                    <button type="button" onClick={handleNext} className="btn-next">
                         Tiếp theo
                     </button>
                 </div>
             </div>
-
         </form>
     );
 }

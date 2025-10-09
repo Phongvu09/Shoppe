@@ -21,6 +21,8 @@ export default function ProductReview() {
                 status: error.status,
                 data: error.data,
             });
+            console.log("Full error object:", error);
+            alert("Đã xảy ra lỗi khi tạo sản phẩm. Vui lòng thử lại.");
         }
     };
 

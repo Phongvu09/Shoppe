@@ -21,13 +21,21 @@ export const getTaxInformationById = handleAsync(async (req, res) => {
 })
 
 export const createTaxInformation = handleAsync(async (req, res) => {
-    const tax = await TaxService.createTaxInformationService(req.body)
+    const userId = req.user?.userId; // Lấy từ token
+    const { shopId } = req.body;
 
-    if (!tax) {
-        return createResponse(res, 400, MESSAGES.CREATE_FAILURE)
-    }
-    return createResponse(res, 200, MESSAGES.CREATE_SUCCESS, tax)
-})
+    if (!userId) return createResponse(res, 401, "Unauthorized: missing userId");
+
+    // Optional: kiểm tra xem shopId này có thuộc về user đang đăng nhập hay không
+    // const shop = await Shop.findOne({ _id: shopId, userId });
+    // if (!shop) return createResponse(res, 403, "Bạn không có quyền thêm thuế cho shop này");
+
+    const tax = await TaxService.createTaxInformationService(req.body);
+
+    if (!tax) return createResponse(res, 400, MESSAGES.CREATE_FAILURE);
+    return createResponse(res, 200, MESSAGES.CREATE_SUCCESS, tax);
+});
+
 
 export const updateTaxInformation = handleAsync(async (req, res) => {
     const tax = await TaxService.updateTaxInformationService(req.params.id, req.body)

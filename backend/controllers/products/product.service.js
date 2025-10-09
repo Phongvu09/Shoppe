@@ -1,5 +1,6 @@
 import Products from "./product.model.js";
 import cloudinary from "../../common/configs/cloudinary.js"
+import mongoose from "mongoose";
 
 export const createProductService = async (productData, files = [], shopId) => {
     console.log("Service received shopId:", shopId); // Thêm log để debug
@@ -74,9 +75,10 @@ export const updateProductService = async (id, productData, files = []) => {
 
 
 export const getAllProductService = async () => {
-    const products = await Products.find();
-    return products
-}
+    const products = await Products.find()
+        .select("name price discount description images");
+    return products;
+};
 
 export const getProductsByShopService = async (shopId, page = 1, limit = 10) => {
     const skip = (page - 1) * limit; // Tính số lượng sản phẩm cần bỏ qua
@@ -98,9 +100,11 @@ export const getProductByIdService = async (id) => {
 }
 
 export const getProductService = async (id) => {
-    const product = await Products.findById(id)
-    return product
-}
+    const product = await Products.findById(id).select("name price discount description images");
+    return product;
+};
+
+
 
 export const deleteProductService = async (id) => {
     // Tìm product theo id
@@ -120,8 +124,51 @@ export const deleteProductService = async (id) => {
     return product; // trả về dữ liệu cũ cho frontend
 };
 
+export const deleteAllProductsService = async (resetIndex = false) => {
+    try {
+        // 🧩 Kiểm tra collection tồn tại
+        const collections = await mongoose.connection.db
+            .listCollections({ name: Products.collection.name })
+            .toArray();
+
+        if (collections.length === 0) {
+            console.log("Collection products chưa tồn tại.");
+            return null;
+        }
+
+        // 🧹 Xóa ảnh trên Cloudinary
+        const products = await Products.find();
+        for (const product of products) {
+            for (const img of product.images || []) {
+                if (img.public_id) {
+                    await cloudinary.uploader.destroy(img.public_id);
+                }
+            }
+        }
+        db.products.dropIndex("productId_1")
 
 
+        if (resetIndex) {
+            // 🔥 Xóa toàn bộ collection (data + index)
+            await Products.collection.drop();
+            console.log("Đã xóa toàn bộ dữ liệu và index trong collection products.");
+            return { message: "Đã xóa toàn bộ dữ liệu và index" };
+        } else {
+            // ❗ Chỉ xóa dữ liệu
+            await Products.deleteMany({});
+            console.log("Đã xóa toàn bộ dữ liệu, giữ nguyên index.");
+            return { message: "Đã xóa toàn bộ dữ liệu, giữ nguyên index" };
+        }
+    } catch (err) {
+        if (err.codeName === "NamespaceNotFound") {
+            console.warn("Collection products không tồn tại, không cần xóa.");
+            return null;
+        }
+
+        console.error("Lỗi khi xóa toàn bộ products:", err);
+        throw err;
+    }
+};
 
 // Khóa sản phẩm
 export const lockProductService = async (id) => {

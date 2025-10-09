@@ -1,13 +1,11 @@
-const MESSAGES = {
-    GET_SUCCESS: "Get identity information successfully",
-    GET_FAILURE: "Get identity information failed",
-    CREATE_SUCCESS: "Create identity information successfully",
-    CREATE_FAILURE: "Create identity information failed",
-    UPDATE_SUCCESS: "Update identity information successfully",
-    UPDATE_FAILURE: "Update identity information failed",
-    DELETE_SUCCESS: "Delete identity information successfully",
-    DELETE_FAILURE: "Delete identity information failed",
-    NOT_FOUND: "Identity information not found"
+export default {
+    GET_SUCCESS: "Lấy danh sách định danh thành công",
+    GET_FAILURE: "Không có định danh nào",
+    CREATE_SUCCESS: "Tạo định danh thành công",
+    CREATE_FAILURE: "Tạo định danh thất bại",
+    UPDATE_SUCCESS: "Cập nhật định danh thành công",
+    UPDATE_FAILURE: "Cập nhật định danh thất bại",
+    DELETE_SUCCESS: "Xóa định danh thành công",
+    DELETE_FAILURE: "Xóa định danh thất bại",
+    NOT_FOUND: "Định danh không tồn tại",
 };
-
-export default MESSAGES

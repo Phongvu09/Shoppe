@@ -1,41 +1,74 @@
 import express from "express";
-import { createOrder, getOrderByshopId, getAllOrders, updateOrder, updateOrderStatus, deleteOrder, getWaitingPickupOrders, getDeliveredOrders, getPendingOrders, getMyOrders } from "./orders.controller.js";
+import {
+  createOrder,
+  getOrderById,
+  getAllOrders,
+  updateOrder,
+  updateOrderStatus,
+  deleteOrder,
+  getMyOrders,
+  getOrderByshopId,
+  getWaitingPickupOrders,
+  getDeliveredOrders,
+  getPendingOrders,
+} from "./orders.controller.js";
+
 import { canUpdateStatus } from "../../common/middleware/checkOrderPermisstion.js";
 import { authMiddleware, restrictTo } from "../../common/middleware/auth.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
 import { createOrderSchema } from "./order.schema.js";
-import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js";
+// import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js";
 
 const router = express.Router();
 
-// 📌 Lấy chi tiết đơn hàng theo id
-router.get("/", getAllOrders);
-// 📦 Buyer xem danh sách đơn hàng của mình
-router.get("/my-orders", authMiddleware, restrictTo(USER_ROLE.USER), getMyOrders);
+/* ========================
+   🛒 Route cho FE Shopee Lite
+======================== */
 
-// 📌 Cập nhật đơn hàng (ví dụ địa chỉ, thông tin khác)
-router.patch("/:id", authMiddleware, updateOrder);
+// Đặt hàng (Checkout.jsx)
+router.post("/", authMiddleware, createOrder);
 
-// 📌 Cập nhật trạng thái đơn hàng (buyer/seller/admin theo workflow)
-router.patch(
-    "/:id/status",
-    authMiddleware,
-    canUpdateStatus,
-    updateOrderStatus
+// Lấy danh sách đơn hàng người dùng
+router.get("/my-orders", authMiddleware, getMyOrders);
+
+// Xem chi tiết đơn hàng
+router.get("/:id", authMiddleware, getOrderById);
+
+/* ========================
+   ⚙️ Route cho Admin / Seller
+======================== */
+
+// Lấy tất cả đơn hàng
+router.get("/", authMiddleware, getAllOrders);
+
+// Cập nhật đơn hàng
+router.put(
+  "/:id",
+  authMiddleware,
+  // validBodyRequest(updateOrderSchema),
+  updateOrder
 );
 
-// 📌 Tạo đơn hàng (buyer)
-router.post("/", authMiddleware, restrictTo(USER_ROLE.USER), validBodyRequest(createOrderSchema), createOrder);
+// Cập nhật trạng thái đơn hàng
+router.put(
+  "/:id/status",
+  authMiddleware,
+  // validBodyRequest(updateStatusSchema),
+  canUpdateStatus,
+  updateOrderStatus
+);
 
-// delete order
+// Xóa đơn hàng
 router.delete("/:id", authMiddleware, deleteOrder);
 
+/* ========================
+   📦 Route cho Seller (quản lý theo shop)
+======================== */
 router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.SELLER));
-router.get("/waitingPickupOrders/", getWaitingPickupOrders);
-router.get("/deliveredOrders/", getDeliveredOrders);
-router.get("/pendingOrders/", getPendingOrders);
+
+router.get("/waitingPickupOrders", getWaitingPickupOrders);
+router.get("/deliveredOrders", getDeliveredOrders);
+router.get("/pendingOrders", getPendingOrders);
 router.get("/shop/:id", getOrderByshopId);
 
-
-const orderRouter = router
-export default orderRouter;
+export default router;

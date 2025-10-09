@@ -1,99 +1,47 @@
+import bcrypt from "bcryptjs";
 import User from "../../models/Users.js";
-import { comparePassword, hashPassword } from "../../common/utils/handler-password.js";
-import { throwError } from "../../common/utils/errror.config.js";
-import MESSAGES from "./auth.message.js";
-import { USER_ROLE } from "../../common/constant/enum.js";
 import { signAccessToken } from "../../common/utils/jwt.js";
-import { is } from "zod/locales";
 
-export const autRegisterService = async (userData) => {
-    const { username, email, password } = userData;
+// ✅ Đăng ký user hoặc seller
+export const registerService = async ({ username, email, password, role }) => {
+  const existed = await User.findOne({ email });
+  if (existed) return null;
 
-    // 1. Kiểm tra email
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-        throwError(400, MESSAGES.EMAIL_ALREADY_EXISTS);
-    }
+  // 🔐 Hash mật khẩu chắc chắn 1 lần
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 2. Hash password
-    const passwordHash = await hashPassword(password);
+  const newUser = await User.create({
+    username,
+    email,
+    password: hashedPassword,
+    role: role?.map((r) => r.toLowerCase()) || ["user"],
+  });
 
-    // 3. Tạo user (đủ field username + email + password + role)
-    const newUser = await User.create({
-        username,
-        email,
-        password: passwordHash,
-        role: [USER_ROLE.USER], // dùng constant thay vì string tay
-    });
-
-    // 4. Ẩn password trước khi trả response
-    newUser.password = undefined;
-    return newUser;
+  newUser.password = undefined;
+  return newUser;
 };
 
-export const authLoginService = async (userData) => {
-    const { email, password } = userData;
+// ✅ Đăng nhập
+export const loginService = async ({ email, password }) => {
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) return { user: null, accessToken: null };
 
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
-        throwError(400, MESSAGES.INVALID_CREDENTIALS);
-    }
+  // So sánh mật khẩu
+  const isMatch = await bcrypt.compare(password, user.password);
+  console.log("🔍 Login debug:", {
+    enteredPassword: password,
+    hashedPassword: user.password,
+    isMatch,
+  });
 
-    const isPasswordValid = await comparePassword(password, existingUser.password);
-    if (!isPasswordValid) {
-        throwError(400, MESSAGES.INVALID_CREDENTIALS);
-    }
+  if (!isMatch) return { user: null, accessToken: null };
 
-    // ✅ Tạo accessToken
-    const accessToken = generateToken(
-        { id: existingUser._id.toString(), role: existingUser.role },
-        process.env.JWT_SECRET,
-        "7d"
-    );
+  const accessToken = signAccessToken({
+    id: user._id.toString(),
+    role: user.role,
+  });
 
-    existingUser.password = undefined;
-
-    return { user: existingUser, accessToken };
-};
-
-export const checkHaveSellerRoleService = async (email) => {
-    const user = await User.findOne({ email });
-    if (user && user.role === USER_ROLE.SELLER) {
-        return true;
-    }
-    return false;
-};
-
-export const loginSellerService = async (userData) => {
-    const { email, password } = userData;
-
-    // 1. Kiểm tra email
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
-        throwError(400, MESSAGES.INVALID_CREDENTIALS);
-    }
-
-    // 2. Kiểm tra password
-    const isPasswordValid = await comparePassword(password, existingUser.password);
-    if (!isPasswordValid) {
-        throwError(400, MESSAGES.INVALID_CREDENTIALS);
-    }
-
-    // 3. Kiểm tra role SELLER, nếu chưa có thì thêm vào
-
-    if (!existingUser.role.includes(USER_ROLE.SELLER)) {
-        existingUser.role = [USER_ROLE.USER, USER_ROLE.SELLER];
-        await existingUser.save();
-
-    }
-
-    // 4. Tạo accessToken
-    const accessToken = generateToken(
-        { id: existingUser._id.toString(), role: existingUser.role },
-        process.env.JWT_SECRET,
-        "7d"
-    );
-
-    existingUser.password = undefined;
-    return { user: existingUser, accessToken };
+  user.password = undefined;
+  return { user, accessToken };
 };

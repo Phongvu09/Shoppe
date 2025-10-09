@@ -1,19 +1,52 @@
 import express from "express";
-import { createIdentityInformation, getAllIdentityInformation, getIdentityInformationById, updateIdentityInformation, deleteIdentityInformation } from "../Identity/identity.controller.js";
-import { validBodyRequest } from "../../common/middleware/valid-body.middleware.js"
-import { createIdentitySchema, updateIdentitySchema } from "./indentity.schema.js"
-import { authMiddleware, restrictTo } from "../../common/middleware/auth.js"
+import {
+    createIdentity,
+    updateIdentity,
+    getAllIdentity,
+    getIdentityById,
+    deleteIdentity,
+    getIdentitiesByShop,
+    getIdentity
+} from "./identity.controller.js";
+
+import { authMiddleware, restrictTo } from "../../common/middleware/auth.js";
 import { USER_ROLE } from "../../common/constant/enum.js";
+import upload from "../../common/middleware/upload.middleware.js";
 
 const router = express.Router();
 
-router.get("/", getAllIdentityInformation)
-router.get("/:id", getIdentityInformationById)
+// Public GET
+router.get("/", getAllIdentity);
+router.get("/:id", getIdentity);
 
-// router.use(authMiddleware, restrictTo(USER_ROLE.ADMIN, USER_ROLE.MANAGER))
-router.delete("/:id", deleteIdentityInformation)
-router.post("/", validBodyRequest(createIdentitySchema), createIdentityInformation)
-router.patch("/:id", validBodyRequest(updateIdentitySchema), updateIdentityInformation)
+// Seller-only routes
+router.use(authMiddleware, restrictTo(USER_ROLE.SELLER));
 
-const identityRouters = router
-export default identityRouters;
+router.get("/my-shop", getIdentitiesByShop);
+
+// CREATE Identity
+router.post(
+    "/",
+    upload.fields([
+        { name: "frontImage", maxCount: 1 },
+        { name: "backImage", maxCount: 1 },
+        { name: "selfieImage", maxCount: 1 },
+    ]),
+    createIdentity
+);
+
+// UPDATE Identity
+router.patch(
+    "/:id",
+    upload.fields([
+        { name: "frontImage", maxCount: 1 },
+        { name: "backImage", maxCount: 1 },
+        { name: "selfieImage", maxCount: 1 },
+    ]),
+    updateIdentity
+);
+
+// DELETE Identity
+router.delete("/:id", deleteIdentity);
+
+export default router;

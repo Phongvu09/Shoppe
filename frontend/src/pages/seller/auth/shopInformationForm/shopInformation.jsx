@@ -19,28 +19,86 @@ const ShopInformation = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [loading, setLoading] = useState(false);
 
+    // Xử lý thay đổi input
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
-        setErrors({ ...errors, [e.target.name]: "" });
+        setErrors((prev) => ({ ...prev, [e.target.name]: "" }));
     };
 
+    // Validate form
     const validateForm = () => {
         const newErrors = {};
-        if (!formData.shopName) newErrors.shopName = "Vui lòng nhập tên shop";
-        if (!formData.receiverName) newErrors.receiverName = "Vui lòng nhập tên người nhận";
-        if (!formData.phone) newErrors.phone = "Vui lòng nhập số điện thoại";
-        if (!formData.street) newErrors.street = "Vui lòng nhập số nhà, tên đường";
-        if (!formData.ward) newErrors.ward = "Vui lòng nhập phường/xã";
-        if (!formData.district) newErrors.district = "Vui lòng nhập quận/huyện";
-        if (!formData.city) newErrors.city = "Vui lòng nhập tỉnh/thành phố";
-        if (!formData.email) newErrors.email = "Vui lòng nhập email";
+        const required = {
+            shopName: "Vui lòng nhập tên shop",
+            receiverName: "Vui lòng nhập tên người nhận",
+            phone: "Vui lòng nhập số điện thoại",
+            street: "Vui lòng nhập số nhà, tên đường",
+            ward: "Vui lòng nhập phường/xã",
+            district: "Vui lòng nhập quận/huyện",
+            city: "Vui lòng nhập tỉnh/thành phố",
+            email: "Vui lòng nhập email"
+        };
+
+        for (const key in required) {
+            if (!formData[key]?.trim()) newErrors[key] = required[key];
+        }
         return newErrors;
     };
 
-    const handleSubmit = (e, action = "next") => {
+    // Submit form
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        const validationErrors = validateForm();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
 
+        const existingShopId = localStorage.getItem("shopId");
+        if (existingShopId) {
+            navigate("/seller/shipping-form");
+            return;
+        }
+
+        const payload = {
+            shopName: formData.shopName.trim(),
+            email: formData.email.trim(),
+            phoneNumber: formData.phone.trim(),
+            pickupAddress: {
+                fullName: formData.receiverName.trim(),
+                phoneNumber: formData.phone.trim(),
+                addressDetail: formData.street.trim(),
+                address: {
+                    province: formData.city.trim(),
+                    district: formData.district.trim(),
+                    ward: formData.ward.trim(),
+                    commune: formData.commune.trim() || ""
+                }
+            }
+        };
+
+        try {
+            setLoading(true);
+            const response = await createShopInformation(payload);
+            console.log("Shop information saved:", response);
+
+            const newShopId = response?.shopId || response?.shop?._id;
+            if (newShopId) localStorage.setItem("shopId", newShopId);
+
+            navigate("/seller/shipping-form");
+        } catch (error) {
+            console.error("Lỗi khi lưu thông tin shop:", error);
+            alert(error.message || "Không thể lưu thông tin shop. Vui lòng thử lại.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Lưu tạm mà không chuyển trang
+    const handleSave = async (e) => {
+        e.preventDefault();
         const validationErrors = validateForm();
         if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
@@ -48,55 +106,49 @@ const ShopInformation = () => {
         }
 
         const payload = {
-            shopName: formData.shopName,
-            email: formData.email,
-            phoneNumber: formData.phone,
-            address: {
-                FullName: formData.receiverName,
-                phoneNumber: formData.phone,
+            shopName: formData.shopName.trim(),
+            email: formData.email.trim(),
+            phoneNumber: formData.phone.trim(),
+            pickupAddress: {
+                fullName: formData.receiverName.trim(),
+                phoneNumber: formData.phone.trim(),
+                addressDetail: formData.street.trim(),
                 address: {
-                    "Province(City)": formData.city,
-                    District: formData.district,
-                    Ward: formData.ward,
-                    Commune: formData.commune || ""
-                },
-                addressDetail: formData.street
+                    province: formData.city.trim(),
+                    district: formData.district.trim(),
+                    ward: formData.ward.trim(),
+                    commune: formData.commune.trim() || ""
+                }
             }
         };
 
-        createShopInformation(payload)
-            .then((response) => {
-                console.log("Shop information saved:", response.data);
-
-                // Giả sử backend trả về { shopId: "SH001", shop: { ... } }
-                const shopId = response.data.shopId;
-
-                // Lưu vào localStorage để các form sau dùng lại
-                localStorage.setItem("shopId", shopId);
-
-                if (action === "next") {
-                    navigate("/shipping-form");
-                } else if (action === "save") {
-                    console.log("Thông tin đã được lưu tạm thời.");
-                } else {
-                    console.log("Unknown action:", action);
-                }
-            })
-            .catch((error) => {
-                console.error("Error saving shop information:", error);
-            });
-
-
-        console.log("Form submitted:", formData);
-
-        localStorage.setItem("shopId", shopId);
+        try {
+            setLoading(true);
+            const response = await createShopInformation(payload);
+            console.log("Thông tin shop đã được lưu:", response);
+            console.log("Shop ID mới:", response?.data?.data?._id || response?.data?._id || response?._id);
+            const newShopId = response?.data?.data?._id || response?.data?._id || response?._id;
+            if (newShopId) localStorage.setItem("shopId", newShopId);
+            alert("Đã lưu thông tin shop tạm thời.");
+        } catch (error) {
+            console.error("Lỗi khi lưu thông tin shop:", error);
+            alert(error.message || "Không thể lưu thông tin shop.");
+        } finally {
+            setLoading(false);
+        }
     };
+
+
+
+    const handleNext = () => {
+        navigate
+            ("/seller/shipping-form");
+    }
 
     return (
         <div className="shop-info-container">
             <h2>Thông tin Shop</h2>
             <form onSubmit={handleSubmit} className="shop-info-form">
-                {/* Tên Shop */}
                 <label>
                     Tên Shop
                     <input
@@ -218,12 +270,12 @@ const ShopInformation = () => {
                     {errors.email && <span className="error-text">{errors.email}</span>}
                 </label>
 
-                {/* Actions giống Identity/Tax */}
                 <div className="form-actions">
                     <button
                         type="button"
                         className="btn-secondary"
                         onClick={() => navigate(-1)}
+                        disabled={loading}
                     >
                         Quay lại
                     </button>
@@ -231,13 +283,19 @@ const ShopInformation = () => {
                         <button
                             type="button"
                             className="btn-secondary"
-                            onClick={(e) => handleSubmit(e, "save")}
+                            onClick={handleSave}
+                            disabled={loading}
                         >
                             Lưu
                         </button>
-                        <button type="submit" className="btn-primary" onClick={(e) => handleSubmit(e, "next")}>
+                        <button
+                            type="button"
+                            className="btn-primary"
+                            onClick={() => navigate("/seller/shipping-form")}
+                        >
                             Tiếp theo
                         </button>
+
                     </div>
                 </div>
             </form>

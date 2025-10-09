@@ -17,8 +17,8 @@ export const getProduct = handleAsync(async (req, res) => {
     if (!product) {
         return createResponse(res, 400, MESSAGES.NOT_FOUND)
     }
-    return createResponse(res, 200, MESSAGES.GET_SUCCESS, product)
-})
+    return createResponse(res, 200, MESSAGES.GET_SUCCESS, product);
+});
 
 export const getProductById = handleAsync(async (req, res) => {
     const product = await productService.getProductByIdService(req.params.id)
@@ -122,4 +122,19 @@ export const getProductsByShop = handleAsync(async (req, res) => {
         totalPages: result.totalPages,
         total: result.total,
     });
+});
+
+export const deleteAllProduct = handleAsync(async (req, res) => {
+    const resetIndex = req.query.resetIndex === "true"; // lấy từ query
+    const result = await productService.deleteAllProductsService(resetIndex);
+
+    if (!result) {
+        return createResponse(res, 404, "Không tìm thấy sản phẩm nào để xóa");
+    }
+
+    const message = resetIndex
+        ? "Đã xóa toàn bộ dữ liệu + index sản phẩm"
+        : "Đã xóa toàn bộ dữ liệu, giữ nguyên index";
+
+    return createResponse(res, 200, message, result);
 });
