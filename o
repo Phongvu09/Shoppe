@@ -1,0 +1,25 @@
+[33ma380cd8[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{0}: rebase (abort): returning to refs/heads/main
+[33mc75c348[m HEAD@{1}: commit (merge): Lưu thay đổi local tạm thời
+[33m143535f[m HEAD@{2}: commit (merge): Lưu thay đổi local tạm thời
+[33m9453bdc[m HEAD@{3}: commit: Lưu thay đổi local tạm thời
+[33m7c2ab85[m HEAD@{4}: commit: hoàn thành sửa tạo xóa trên frontend, phân trang
+[33m50dd12b[m HEAD@{5}: commit: tạo được order, thay đổi status order
+[33ma380cd8[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{6}: reset: moving to a380cd8
+[33m0dc7a33[m HEAD@{7}: pull origin main --rebase (start): checkout 0dc7a33dd332142135abf8b516e35bafa3f5eced
+[33ma380cd8[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{8}: Branch: renamed refs/heads/main to refs/heads/main
+[33ma380cd8[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m HEAD@{10}: commit: tạo được order, thay đổi status order
+[33me88dc88[m HEAD@{11}: Branch: renamed refs/heads/main to refs/heads/main
+[33me88dc88[m HEAD@{13}: commit: chỉnh sửa hoàn chỉnh tạo thông tin sản phẩm, hiển thị được sản phẩm trên fe
+[33mfa9346f[m HEAD@{14}: Branch: renamed refs/heads/main to refs/heads/main
+[33mfa9346f[m HEAD@{16}: commit: chỉnh sửa hoàn tất tạo thử thông tin seller, upload được ảnh product từ postman lên cloudinary
+[33m38ee27d[m HEAD@{17}: Branch: renamed refs/heads/main to refs/heads/main
+[33m38ee27d[m HEAD@{19}: commit: Thêm unlock,lock-seller; thêm unlock;lock-product, thêm order và các tính năng
+[33m3d2ee6c[m HEAD@{20}: commit (merge): Resolve merge conflict in product.schema.js and App.jsx
+[33mc9b11af[m HEAD@{21}: commit: update code
+[33m653a3c0[m HEAD@{22}: commit: update code
+[33mf674c0d[m HEAD@{23}: commit: update code
+[33m8041461[m HEAD@{24}: commit: update code
+[33m53a9398[m HEAD@{25}: commit: update code
+[33me657fc3[m HEAD@{26}: commit: update code
+[33mcf9d5df[m HEAD@{27}: Branch: renamed refs/heads/main to refs/heads/main
+[33mcf9d5df[m HEAD@{29}: commit (initial): first commit
