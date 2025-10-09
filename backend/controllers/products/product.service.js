@@ -1,5 +1,5 @@
 import Products from "./product.model.js";
-import cloudinary from "../../common/configs/cloudinary.js"
+import cloudinary from "../../common/configs/cloudinary.config.js"
 import mongoose from "mongoose";
 
 export const createProductService = async (productData, files = [], shopId) => {

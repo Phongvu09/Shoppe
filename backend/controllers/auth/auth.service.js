@@ -4,21 +4,19 @@ import { signAccessToken } from "../../common/utils/jwt.js";
 
 // ✅ Đăng ký user hoặc seller
 export const registerService = async ({ username, email, password, role }) => {
+  // Kiểm tra email tồn tại chưa
   const existed = await User.findOne({ email });
   if (existed) return null;
 
-  // 🔐 Hash mật khẩu chắc chắn 1 lần
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-
+  // 🚫 KHÔNG hash mật khẩu ở đây nữa, vì User model đã tự hash trong pre("save")
   const newUser = await User.create({
     username,
     email,
-    password: hashedPassword,
+    password, // để raw password, schema sẽ tự hash
     role: role?.map((r) => r.toLowerCase()) || ["user"],
   });
 
-  newUser.password = undefined;
+  newUser.password = undefined; // không trả mật khẩu ra response
   return newUser;
 };
 
@@ -27,7 +25,7 @@ export const loginService = async ({ email, password }) => {
   const user = await User.findOne({ email }).select("+password");
   if (!user) return { user: null, accessToken: null };
 
-  // So sánh mật khẩu
+  // 🔐 So sánh mật khẩu
   const isMatch = await bcrypt.compare(password, user.password);
   console.log("🔍 Login debug:", {
     enteredPassword: password,
@@ -37,6 +35,7 @@ export const loginService = async ({ email, password }) => {
 
   if (!isMatch) return { user: null, accessToken: null };
 
+  // ✅ Tạo access token
   const accessToken = signAccessToken({
     id: user._id.toString(),
     role: user.role,

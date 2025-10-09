@@ -13,11 +13,13 @@ export default function Navbar() {
     }
   });
 
-  // ✅ Lấy user nếu có token
+  const [cartCount, setCartCount] = useState(0); // ✅ Thêm state đếm giỏ hàng
+
+  // ✅ Lấy thông tin user nếu có token
   const fetchMe = useCallback(async () => {
     try {
       const token = localStorage.getItem("access_token");
-      if (!token) return; // Không gọi nếu chưa login
+      if (!token) return;
 
       const res = await api.get("/api/auth/me");
       const me = res?.data?.user || res?.data?.data?.user || null;
@@ -26,21 +28,43 @@ export default function Navbar() {
         localStorage.setItem("user", JSON.stringify(me));
       }
     } catch (err) {
-      console.warn("⚠️ Không lấy được user, bỏ qua:", err.message);
-      // ❌ Không xoá user để tránh bị quay về login
+      console.warn("⚠️ Không lấy được user:", err.message);
     }
   }, []);
 
+  // ✅ Lấy giỏ hàng
+  const fetchCart = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+      if (!token) return setCartCount(0);
+      const res = await api.get("/api/cart");
+      const count = res.data?.items?.length || 0;
+      setCartCount(count);
+    } catch (err) {
+      console.warn("⚠️ Không lấy được giỏ hàng:", err.message);
+      setCartCount(0);
+    }
+  }, []);
+
+  // ✅ Load khi khởi động và khi có event auth/cart thay đổi
   useEffect(() => {
     fetchMe();
-    const onAuthChanged = () => fetchMe();
+    fetchCart();
+
+    const onAuthChanged = () => {
+      fetchMe();
+      fetchCart();
+    };
     window.addEventListener("auth-changed", onAuthChanged);
+    window.addEventListener("cart-updated", fetchCart);
     window.addEventListener("storage", onAuthChanged);
+
     return () => {
       window.removeEventListener("auth-changed", onAuthChanged);
+      window.removeEventListener("cart-updated", fetchCart);
       window.removeEventListener("storage", onAuthChanged);
     };
-  }, [fetchMe]);
+  }, [fetchMe, fetchCart]);
 
   // ✅ Logout
   const handleLogout = async () => {
@@ -51,7 +75,7 @@ export default function Navbar() {
       localStorage.removeItem("user");
       setUser(null);
       window.dispatchEvent(new Event("auth-changed"));
-      navigate("/"); // quay về HomePage, không login
+      navigate("/");
     }
   };
 
@@ -87,6 +111,13 @@ export default function Navbar() {
             {user ? (
               <div className="flex items-center gap-2">
                 <span className="font-medium">👤 {user.username || user.email}</span>
+                    {/* ✅ Nút My Orders */}
+    <button
+      onClick={() => navigate("/my-orders")}
+      className="bg-white/10 hover:bg-white/20 text-white px-2 py-[2px] rounded text-xs"
+    >
+      Đơn hàng của tôi
+    </button>
                 <button
                   onClick={handleLogout}
                   className="bg-white/10 hover:bg-white/20 text-white px-2 py-[2px] rounded text-xs"
@@ -144,7 +175,7 @@ export default function Navbar() {
           >
             🛒
             <span className="absolute -top-2 -right-2 text-[11px] bg-white text-[#ee4d2d] rounded-full px-1">
-              0
+              {cartCount}
             </span>
           </Link>
         </div>

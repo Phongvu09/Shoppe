@@ -9,7 +9,7 @@ import {
     unlockProduct,
     getProductsByShop,
     getProduct,
-    deleteAllProduct
+    deleteAllProduct,
 } from "../products/products.controller.js";
 
 import { validBodyWithFiles } from "../../common/middleware/valid-body.middleware.js";

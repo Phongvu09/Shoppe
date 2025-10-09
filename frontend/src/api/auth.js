@@ -1,4 +1,3 @@
-// src/api/auth.js
 import { USER_ROLE } from "../../../backend/common/constant/enum.js";
 import api from "./api.js";
 
@@ -13,17 +12,18 @@ function normalizeError(err) {
 
 // ----- USER -----
 export async function register(username, email, password, role) {
-  // nếu role là string, gói thành array
-  const roleArray = Array.isArray(role) ? role : [role];
-
-  const response = await api.post("/user/register", {
-    username,
-    email,
-    password,
-    role: roleArray,
-  });
-
-  return response.data;
+  try {
+    const roleArray = Array.isArray(role) ? role : [role];
+    const { data } = await api.post("/user/register", {
+      username,
+      email,
+      password,
+      role: roleArray,
+    });
+    return data;
+  } catch (err) {
+    throw normalizeError(err);
+  }
 }
 
 // ----- SELLER -----
@@ -73,24 +73,12 @@ export async function logout() {
   }
 }
 
-// export async function checkHaveSellerRole(email) {
-//   try {
-//     const response = await api.post("/user/check-seller-role", { email });
-//     return response.data;
-//   } catch (error) {
-//     throw error.response?.data || error.message;
-//   }
-// }
-
-// Đăng nhập SELLER
-
-
+// ----- LOGIN SELLER -----
 export async function loginSeller(email, password) {
   try {
-    const response = await api.post("/user/login-seller", { email, password });
-    return response.data;
-  } catch (error) {
-    normalizeError(error)
+    const { data } = await api.post("/user/login-seller", { email, password });
+    return data;
+  } catch (err) {
+    throw normalizeError(err);
   }
 }
-

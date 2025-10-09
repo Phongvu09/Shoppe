@@ -15,6 +15,9 @@ import orderRouter from "./controllers/orders/orders.router.js";
 import userRouter from "./controllers/users/users.router.js";
 import { use } from "react";
 
+// 🛒 Thêm giỏ hàng
+import cartRoute from "./controllers/Cart/cartRoute.js";
+
 const app = express();
 
 // ---------- Middleware cơ bản ----------
@@ -41,6 +44,7 @@ app.use("/api/tax", taxRouters);
 app.use("/api/identity", identityRouters);
 app.use("/api/order", orderRouter);
 
+app.use("/api/cart", cartRoute);
 
 // ---------- Health check ----------
 app.get("/api/health", (req, res) => {

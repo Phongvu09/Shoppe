@@ -1,5 +1,5 @@
 import Identity from "./identity.model.js";
-import cloudinary from "../../common/configs/cloudinary.js";
+import cloudinary from "../../common/configs/cloudinary.config.js";
 import { z } from "zod";
 import { createIdentitySchema } from "./identity.schema.js";
 
